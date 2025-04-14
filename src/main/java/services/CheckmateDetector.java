@@ -6,6 +6,8 @@ import model.pieces.Bishop;
 import model.pieces.King;
 import model.pieces.Queen;
 import model.pieces.common.Piece;
+import services.strategy.KingStrategy;
+import services.strategy.common.PieceStrategy;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -17,28 +19,28 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * @author Jussi Lundstedt
  */
 public class CheckmateDetector {
-    private final LinkedList<Square> squares;
-    private Board board;
-    private LinkedList<Piece> wPieces;
-    private LinkedList<Piece> bPieces;
-    private LinkedList<Square> movableSquares;
-    private King bk;
-    private King wk;
-    private HashMap<Square, List<Piece>> wMoves;
-    private HashMap<Square, List<Piece>> bMoves;
+    private final LinkedList<SquareService> squares;
+    private BoardService board;
+    private LinkedList<PieceStrategy> wPieces;
+    private LinkedList<PieceStrategy> bPieces;
+    private LinkedList<SquareService> movableSquares;
+    private KingStrategy bk;
+    private KingStrategy wk;
+    private HashMap<SquareService, List<PieceStrategy>> wMoves;
+    private HashMap<SquareService, List<PieceStrategy>> bMoves;
 
     /**
      * Constructs a new instance of services.CheckmateDetector on a given board. By
      * convention should be called when the board is in its initial state.
      *
-     * @param b       The board which the detector monitors
+     * @param board       The board which the detector monitors
      * @param wPieces White pieces on the board.
      * @param bPieces Black pieces on the board.
      * @param wk      chesspieces.common.Piece object representing the white king
      * @param bk      chesspieces.common.Piece object representing the black king
      */
-    public CheckmateDetector(Board board, LinkedList<Piece> wPieces,
-                             LinkedList<Piece> bPieces, King wk, King bk) {
+    public CheckmateDetector(BoardService board, LinkedList<PieceStrategy> wPieces,
+                             LinkedList<PieceStrategy> bPieces, KingStrategy wk, KingStrategy bk) {
         this.board = board;
         this.wPieces = wPieces;
         this.bPieces = bPieces;
@@ -46,19 +48,19 @@ public class CheckmateDetector {
         this.wk = wk;
 
         // Initialize other fields
-        squares = new LinkedList<Square>();
-        movableSquares = new LinkedList<Square>();
-        wMoves = new HashMap<Square, List<Piece>>();
-        bMoves = new HashMap<Square, List<Piece>>();
+        squares = new LinkedList<>();
+        movableSquares = new LinkedList<>();
+        wMoves = new HashMap<>();
+        bMoves = new HashMap<>();
 
-        Square[][] brd = board.getSquareChessBoard();
+        SquareService[][] brd = board.getSquareBoard();
 
         // add all squares to squares list and as hashmap keys
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
                 squares.add(brd[y][x]);
-                wMoves.put(brd[y][x], new LinkedList<Piece>());
-                bMoves.put(brd[y][x], new LinkedList<Piece>());
+                wMoves.put(brd[y][x], new LinkedList<>());
+                bMoves.put(brd[y][x], new LinkedList<>());
             }
         }
 
@@ -440,20 +442,20 @@ public class CheckmateDetector {
      * @param sq chesspieces.Square to which p is about to move
      * @return false if move would cause a check
      */
-    public boolean testMove(Piece p, Square sq) {
-        Piece c = sq.getOccupyingPiece();
+    public boolean testMove(PieceStrategy p, SquareService sq) {
+        PieceStrategy pieceStrategy = sq.getOccupyingPiece();
 
         boolean movetest = true;
-        Square init = p.getCurrentSquare();
+        SquareService squareService = p.getSquareService();
 
         p.move(sq, board);
         update();
 
-        if (p.getColor() == 0 && blackInCheck()) movetest = false;
-        else if (p.getColor() == 1 && whiteInCheck()) movetest = false;
+        if (p.getPiece().getColor() == 0 && blackInCheck()) movetest = false;
+        else if (p.getPiece().getColor() == 1 && whiteInCheck()) movetest = false;
 
-        p.move(init, board);
-        if (c != null) sq.put(c);
+        p.move(squareService, board);
+        if (pieceStrategy != null) sq.put(pieceStrategy);
 
         update();
 

@@ -3,6 +3,7 @@ package view.mouseListener;
 import model.board.Board;
 import model.board.Square;
 import services.BoardService;
+import services.SquareService;
 import view.BoardView;
 import view.SquareView;
 
@@ -27,19 +28,19 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
     @Override
     public void handleMousePressed(MouseEvent e) {
-        Board board = boardView.getBoardService().getBoard();
+        BoardService boardService = boardView.getBoardService();
 
-        board.setCurrX(e.getX());
-        board.setCurrY(e.getY());
+        boardService.getBoard().setCurrX(e.getX());
+        boardService.getBoard().setCurrY(e.getY());
 
         SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        Square square = squareView.getSquare();
+        SquareService squareService = squareView.getSquareService();
 
-        if (square.isOccupied()) {
-            board.setCurrPiece(square.getOccupyingPiece());
-            if (board.getCurrPiece().getColor() == 0 && board.isWhiteTurn())
+        if (squareService.isOccupied()) {
+            boardService.setPiece(squareService.getOccupyingPiece());
+            if (boardService.getPiece().getPiece().getColor() == 0 && boardService.getBoard().isWhiteTurn())
                 return;
-            if (board.getCurrPiece().getColor() == 1 && !board.isWhiteTurn())
+            if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.getBoard().isWhiteTurn())
                 return;
             squareView.setDisplayPiece(true);
         }
@@ -49,7 +50,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
     @Override
     public void handleMouseReleased(MouseEvent e) {
         SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        Square square = squareView.getSquare();
+        SquareService square = squareView.getSquareService();
         Board board = boardView.getBoardService().getBoard();
 
         if (board.getCurrPiece() == null) return;
@@ -60,7 +61,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
         if (board.getCurrPiece().getColor() == 1 && !board.isWhiteTurn())
             return;
 
-        List<Square> legalMoves = boardView.getBoardService().getPiece().getLegalMoves(board);
+        List<SquareService> legalMoves = boardView.getBoardService().getPiece().getLegalMoves(boardView.getBoardService());
 
         List<Square> movableSquares = board.getCkeckmateDetector().getAllowableSquares(board.isWhiteTurn());
         board.setMovable(movableSquares);

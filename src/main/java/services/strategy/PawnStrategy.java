@@ -3,6 +3,8 @@ package services.strategy;
 import model.board.Board;
 import model.board.Square;
 import model.pieces.common.Piece;
+import services.BoardService;
+import services.SquareService;
 import services.strategy.common.PieceStrategy;
 
 import java.util.LinkedList;
@@ -16,17 +18,17 @@ public class PawnStrategy extends PieceStrategy {
     }
 
     @Override
-    public boolean move(Square fin, Board board) {
+    public boolean move(SquareService fin, BoardService board) {
         boolean b = super.move(fin, board);
         wasMoved = true;
         return b;
     }
 
     @Override
-    public List<Square> getLegalMoves(Board board) {
-        LinkedList<Square> legalMoves = new LinkedList<Square>();
+    public List<SquareService> getLegalMoves(BoardService boardService) {
+        LinkedList<SquareService> legalMoves = new LinkedList<>();
 
-        Square[][] squareArrayBoard = board.getSquareChessBoard();
+        SquareService[][] squareArrayBoard = boardService.getSquareBoard();
 
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();

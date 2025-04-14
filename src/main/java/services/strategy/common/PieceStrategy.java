@@ -40,5 +40,5 @@ public abstract class PieceStrategy {
         g.drawImage(this.getPiece().getImg(), 0, 0, null);
     }
 
-    public abstract List<Square> getLegalMoves(Board board);
+    public abstract List<SquareService> getLegalMoves(BoardService board);
 }
