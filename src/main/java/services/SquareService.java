@@ -1,5 +1,6 @@
 package services;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import model.board.Square;
@@ -8,6 +9,7 @@ import services.strategy.common.PieceStrategy;
 
 @Getter
 @Setter
+@EqualsAndHashCode(exclude = "occupyingPiece")
 public class SquareService {
 
     private Square square;
@@ -23,6 +25,7 @@ public class SquareService {
 
     public void put(PieceStrategy pieceStrategy) {
         square.setOccupyingPiece(pieceStrategy.getPiece());
+        setOccupyingPiece(pieceStrategy);
         pieceStrategy.setSquareService(this);
     }
 

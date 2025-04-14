@@ -26,7 +26,7 @@ public abstract class PieceStrategy {
 
         if (occupyingPiece != null) {
             if (occupyingPiece.getPiece().getColor() == piece.getColor()) return false;
-            else boardService.capture(piece, this.squareService);
+            else boardService.capture(this, this.squareService);
         }
 
         squareService.removePiece();

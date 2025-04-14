@@ -2,13 +2,14 @@ package services.strategy.movement.utils;
 
 import model.board.Square;
 import model.pieces.common.Piece;
+import services.SquareService;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class PieceMovementUtil {
 
-    public static int[] getLinearOccupations(Square[][] board, int x, int y, Piece piece) {
+    public static int[] getLinearOccupations(SquareService[][] board, int x, int y, Piece piece) {
         int lastYabove = 0;
         int lastXright = 7;
         int lastYbelow = 7;
@@ -16,7 +17,7 @@ public class PieceMovementUtil {
 
         for (int i = 0; i < y; i++) {
             if (board[i][x].isOccupied()) {
-                if (board[i][x].getOccupyingPiece().getColor() != piece.getColor()) {
+                if (board[i][x].getOccupyingPiece().getPiece().getColor() != piece.getColor()) {
                     lastYabove = i;
                 } else lastYabove = i + 1;
             }
@@ -24,7 +25,7 @@ public class PieceMovementUtil {
 
         for (int i = 7; i > y; i--) {
             if (board[i][x].isOccupied()) {
-                if (board[i][x].getOccupyingPiece().getColor() != piece.getColor()) {
+                if (board[i][x].getOccupyingPiece().getPiece().getColor() != piece.getColor()) {
                     lastYbelow = i;
                 } else lastYbelow = i - 1;
             }
@@ -32,7 +33,7 @@ public class PieceMovementUtil {
 
         for (int i = 0; i < x; i++) {
             if (board[y][i].isOccupied()) {
-                if (board[y][i].getOccupyingPiece().getColor() != piece.getColor()) {
+                if (board[y][i].getOccupyingPiece().getPiece().getColor() != piece.getColor()) {
                     lastXleft = i;
                 } else lastXleft = i + 1;
             }
@@ -40,7 +41,7 @@ public class PieceMovementUtil {
 
         for (int i = 7; i > x; i--) {
             if (board[y][i].isOccupied()) {
-                if (board[y][i].getOccupyingPiece().getColor() != piece.getColor()) {
+                if (board[y][i].getOccupyingPiece().getPiece().getColor() != piece.getColor()) {
                     lastXright = i;
                 } else lastXright = i - 1;
             }
@@ -51,8 +52,8 @@ public class PieceMovementUtil {
         return occups;
     }
 
-    public static List<Square> getDiagonalOccupations(Square[][] board, int x, int y, Piece piece) {
-        LinkedList<Square> diagOccup = new LinkedList<Square>();
+    public static List<SquareService> getDiagonalOccupations(SquareService[][] board, int x, int y, Piece piece) {
+        LinkedList<SquareService> diagOccup = new LinkedList<>();
 
         int xNW = x - 1;
         int xSW = x - 1;
@@ -65,7 +66,7 @@ public class PieceMovementUtil {
 
         while (xNW >= 0 && yNW >= 0) {
             if (board[yNW][xNW].isOccupied()) {
-                if (board[yNW][xNW].getOccupyingPiece().getColor() == piece.getColor()) {
+                if (board[yNW][xNW].getOccupyingPiece().getPiece().getColor() == piece.getColor()) {
                     break;
                 } else {
                     diagOccup.add(board[yNW][xNW]);
@@ -80,7 +81,7 @@ public class PieceMovementUtil {
 
         while (xSW >= 0 && ySW < 8) {
             if (board[ySW][xSW].isOccupied()) {
-                if (board[ySW][xSW].getOccupyingPiece().getColor() == piece.getColor()) {
+                if (board[ySW][xSW].getOccupyingPiece().getPiece().getColor() == piece.getColor()) {
                     break;
                 } else {
                     diagOccup.add(board[ySW][xSW]);
@@ -95,7 +96,7 @@ public class PieceMovementUtil {
 
         while (xSE < 8 && ySE < 8) {
             if (board[ySE][xSE].isOccupied()) {
-                if (board[ySE][xSE].getOccupyingPiece().getColor() == piece.getColor()) {
+                if (board[ySE][xSE].getOccupyingPiece().getPiece().getColor() == piece.getColor()) {
                     break;
                 } else {
                     diagOccup.add(board[ySE][xSE]);
@@ -110,7 +111,7 @@ public class PieceMovementUtil {
 
         while (xNE < 8 && yNE >= 0) {
             if (board[yNE][xNE].isOccupied()) {
-                if (board[yNE][xNE].getOccupyingPiece().getColor() == piece.getColor()) {
+                if (board[yNE][xNE].getOccupyingPiece().getPiece().getColor() == piece.getColor()) {
                     break;
                 } else {
                     diagOccup.add(board[yNE][xNE]);

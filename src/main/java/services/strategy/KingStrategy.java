@@ -3,6 +3,8 @@ package services.strategy;
 import model.board.Board;
 import model.board.Square;
 import model.pieces.common.Piece;
+import services.BoardService;
+import services.SquareService;
 import services.strategy.common.PieceStrategy;
 
 import java.util.LinkedList;
@@ -15,10 +17,10 @@ public class KingStrategy extends PieceStrategy {
     }
 
     @Override
-    public List<Square> getLegalMoves(Board board) {
-        LinkedList<Square> legalMoves = new LinkedList<Square>();
+    public List<SquareService> getLegalMoves(BoardService board) {
+        List<SquareService> legalMoves = new LinkedList<>();
 
-        Square[][] squareArrayBoard = board.getSquareChessBoard();
+        SquareService[][] squareArrayBoard = board.getSquareBoard();
 
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();
@@ -28,7 +30,7 @@ public class KingStrategy extends PieceStrategy {
                 if (!(i == 0 && k == 0)) {
                     try {
                         if (!squareArrayBoard[y + k][x + i].isOccupied() ||
-                                squareArrayBoard[y + k][x + i].getOccupyingPiece().getColor()
+                                squareArrayBoard[y + k][x + i].getOccupyingPiece().getPiece().getColor()
                                         != super.getPiece().getColor()) {
                             legalMoves.add(squareArrayBoard[y + k][x + i]);
                         }

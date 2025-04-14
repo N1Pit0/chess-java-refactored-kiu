@@ -10,6 +10,7 @@ import view.SquareView;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
@@ -50,47 +51,48 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
     @Override
     public void handleMouseReleased(MouseEvent e) {
         SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        SquareService square = squareView.getSquareService();
-        Board board = boardView.getBoardService().getBoard();
+        SquareService squareService = squareView.getSquareService();
+        BoardService boardService = boardView.getBoardService();
 
-        if (board.getCurrPiece() == null) return;
+        if (boardService.getPiece() == null) return;
 
-        if (board.getCurrPiece().getColor() == 0 && board.isWhiteTurn())
+        if (boardService.getPiece().getPiece().getColor() == 0 && boardService.getBoard().isWhiteTurn())
             return;
 
-        if (board.getCurrPiece().getColor() == 1 && !board.isWhiteTurn())
+        if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
             return;
 
-        List<SquareService> legalMoves = boardView.getBoardService().getPiece().getLegalMoves(boardView.getBoardService());
+        List<SquareService> legalMoves = boardService.getPiece().getLegalMoves(boardService);
 
-        List<Square> movableSquares = board.getCkeckmateDetector().getAllowableSquares(board.isWhiteTurn());
-        board.setMovable(movableSquares);
+        List<SquareService> movableSquares = boardService.getCkeckmateDetector().getAllowableSquares(boardService.isWhiteTurn());
 
-        if (legalMoves.contains(square) && board.getMovable().contains(square)
-                && board.getCkeckmateDetector().testMove(board.getCurrPiece(), square)) {
+        boardService.setMovableSquares(movableSquares);
+
+        if (legalMoves.contains(squareService) && boardService.getMovableSquares().contains(squareService)
+                && boardService.getCkeckmateDetector().testMove(boardService.getPiece(), squareService)) {
             squareView.setDisplayPiece(true);
-            boardView.getBoardService().getPiece().move(square, board);
-            board.getCkeckmateDetector().update();
+            boardService.getPiece().move(squareService, boardService);
+            boardService.getCkeckmateDetector().update();
 
-            if (board.getCkeckmateDetector().blackCheckMated()) {
+            if (boardService.getCkeckmateDetector().blackCheckMated()) {
 
-                setupBoardForCheckmate(board, 0);
+                setupBoardForCheckmate(boardService, 0);
 
-            } else if (board.getCkeckmateDetector().blackCheckMated()) {
+            } else if (boardService.getCkeckmateDetector().blackCheckMated()) {
 
-                setupBoardForCheckmate(board, 1);
+                setupBoardForCheckmate(boardService, 1);
 
             } else {
-                board.setCurrPiece(null);
+                boardService.setPiece(null);
 
-                board.setWhiteTurn(!board.isWhiteTurn());
+                boardService.setWhiteTurn(!boardService.isWhiteTurn());
 
-                board.setMovable(board.getCkeckmateDetector().getAllowableSquares(board.isWhiteTurn()));
+                boardService.setMovableSquares(movableSquares);
             }
 
         } else {
             squareView.setDisplayPiece(true);
-            board.setCurrPiece(null);
+            boardService.setPiece(null);
         }
 
         boardView.repaint();
@@ -103,8 +105,8 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
         boardView.repaint();
     }
 
-    private void setupBoardForCheckmate(Board board, int colorCheckMated) {
-        board.setCurrPiece(null);
+    private void setupBoardForCheckmate(BoardService board, int colorCheckMated) {
+        board.setPiece(null);
         boardView.repaint();
         boardView.removeMouseListener(boardMouseListener);
         boardView.removeMouseMotionListener(boardMouseMotionListener);

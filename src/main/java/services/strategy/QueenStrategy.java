@@ -3,6 +3,8 @@ package services.strategy;
 import model.board.Board;
 import model.board.Square;
 import model.pieces.common.Piece;
+import services.BoardService;
+import services.SquareService;
 import services.strategy.common.PieceStrategy;
 import services.strategy.movement.utils.PieceMovementUtil;
 
@@ -16,9 +18,9 @@ public class QueenStrategy extends PieceStrategy {
     }
 
     @Override
-    public List<Square> getLegalMoves(Board board) {
-        LinkedList<Square> legalMoves = new LinkedList<Square>();
-        Square[][] squareArrayBoard = board.getSquareChessBoard();
+    public List<SquareService> getLegalMoves(BoardService board) {
+        LinkedList<SquareService> legalMoves = new LinkedList<>();
+        SquareService[][] squareArrayBoard = board.getSquareBoard();
 
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();
@@ -33,7 +35,7 @@ public class QueenStrategy extends PieceStrategy {
             if (i != x) legalMoves.add(squareArrayBoard[y][i]);
         }
 
-        List<Square> bMoves = PieceMovementUtil.getDiagonalOccupations(squareArrayBoard, x, y, super.getPiece());
+        List<SquareService> bMoves = PieceMovementUtil.getDiagonalOccupations(squareArrayBoard, x, y, super.getPiece());
 
         legalMoves.addAll(bMoves);
 

@@ -3,6 +3,8 @@ package services.strategy;
 import model.board.Board;
 import model.board.Square;
 import model.pieces.common.Piece;
+import services.BoardService;
+import services.SquareService;
 import services.strategy.common.PieceStrategy;
 
 import java.util.LinkedList;
@@ -15,9 +17,9 @@ public class KnightStrategy extends PieceStrategy {
     }
 
     @Override
-    public List<Square> getLegalMoves(Board board) {
-        LinkedList<Square> legalMoves = new LinkedList<Square>();
-        Square[][] squareArrayBoard = board.getSquareChessBoard();
+    public List<SquareService> getLegalMoves(BoardService board) {
+        LinkedList<SquareService> legalMoves = new LinkedList<>();
+        SquareService[][] squareArrayBoard = board.getSquareBoard();
 
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();

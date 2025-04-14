@@ -17,7 +17,6 @@ public class Board {
     private final Square[][] squareChessBoard;
     private final GameWindow gameWindow;
 
-    private List<Square> movable;
     private boolean whiteTurn;
     private Piece currPiece;
 
