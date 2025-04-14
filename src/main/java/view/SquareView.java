@@ -3,6 +3,7 @@ package view;
 import model.board.Square;
 import lombok.Getter;
 import lombok.Setter;
+import services.SquareService;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,11 +11,11 @@ import java.awt.*;
 @Getter
 @Setter
 public class SquareView extends JComponent {
-    private Square square;
+    private SquareService squareService;
     private boolean displayPiece;
 
-    public SquareView(Square square) {
-        this.square = square;
+    public SquareView(SquareService squareService) {
+        this.squareService = squareService;
         this.displayPiece = true;
 
         this.setBorder(BorderFactory.createEmptyBorder());
@@ -23,7 +24,7 @@ public class SquareView extends JComponent {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (this.square.getColor() == 1) {
+        if (this.squareService.getSquare().getColor() == 1) {
             g.setColor(new Color(221, 192, 127));
         } else {
             g.setColor(new Color(101, 67, 33));
@@ -31,8 +32,8 @@ public class SquareView extends JComponent {
 
         g.fillRect(0, 0, this.getWidth(), this.getHeight());
 
-        if (this.square.getOccupyingPiece() != null && displayPiece) {
-            this.square.getOccupyingPiece().draw(g);
+        if (squareService.getOccupyingPiece() != null && displayPiece) {
+            squareService.getOccupyingPiece().draw(g);
         }
     }
 }

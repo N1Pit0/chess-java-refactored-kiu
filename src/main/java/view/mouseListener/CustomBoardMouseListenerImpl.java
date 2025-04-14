@@ -2,6 +2,7 @@ package view.mouseListener;
 
 import model.board.Board;
 import model.board.Square;
+import services.BoardService;
 import view.BoardView;
 import view.SquareView;
 
@@ -26,7 +27,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
     @Override
     public void handleMousePressed(MouseEvent e) {
-        Board board = boardView.getBoard();
+        Board board = boardView.getBoardService().getBoard();
 
         board.setCurrX(e.getX());
         board.setCurrY(e.getY());
@@ -49,7 +50,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
     public void handleMouseReleased(MouseEvent e) {
         SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
         Square square = squareView.getSquare();
-        Board board = boardView.getBoard();
+        Board board = boardView.getBoardService().getBoard();
 
         if (board.getCurrPiece() == null) return;
 
@@ -59,7 +60,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
         if (board.getCurrPiece().getColor() == 1 && !board.isWhiteTurn())
             return;
 
-        List<Square> legalMoves = board.getCurrPiece().getLegalMoves(board);
+        List<Square> legalMoves = boardView.getBoardService().getPiece().getLegalMoves(board);
 
         List<Square> movableSquares = board.getCkeckmateDetector().getAllowableSquares(board.isWhiteTurn());
         board.setMovable(movableSquares);
@@ -67,7 +68,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
         if (legalMoves.contains(square) && board.getMovable().contains(square)
                 && board.getCkeckmateDetector().testMove(board.getCurrPiece(), square)) {
             squareView.setDisplayPiece(true);
-            board.getCurrPiece().move(square);
+            boardView.getBoardService().getPiece().move(square, board);
             board.getCkeckmateDetector().update();
 
             if (board.getCkeckmateDetector().blackCheckMated()) {
@@ -96,8 +97,8 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
     @Override
     public void handleMouseDragged(MouseEvent e) {
-        boardView.getBoard().setCurrX(e.getX());
-        boardView.getBoard().setCurrY(e.getY());
+        boardView.getBoardService().getBoard().setCurrX(e.getX());
+        boardView.getBoardService().getBoard().setCurrY(e.getY());
         boardView.repaint();
     }
 

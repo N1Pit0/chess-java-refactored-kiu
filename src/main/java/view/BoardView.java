@@ -4,22 +4,24 @@ import model.board.Board;
 import model.board.Square;
 import lombok.Getter;
 import model.pieces.common.Piece;
+import services.BoardService;
+import services.SquareService;
 
 import javax.swing.*;
 import java.awt.*;
 
 @Getter
 public class BoardView extends JPanel {
-    private final Board board;
+    private final BoardService boardService;
 
-    public BoardView(Board board) {
-        this.board = board;
+    public BoardView(BoardService boardService) {
+        this.boardService = boardService;
 
         setLayout(new GridLayout(8, 8, 0, 0));
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                this.add(new SquareView(this.board.getSquareChessBoard()[x][y])); // ??
+                this.add(new SquareView(new SquareService(this.boardService.getBoard().getSquareChessBoard()[x][y]))); // ??
             }
         }
 
@@ -32,9 +34,9 @@ public class BoardView extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Square[][] board = this.board.getSquareChessBoard();
-        Piece currPiece = this.board.getCurrPiece();
-        boolean whiteTurn = this.board.isWhiteTurn();
+        Square[][] board = this.boardService.getBoard().getSquareChessBoard();
+        Piece currPiece = this.boardService.getBoard().getCurrPiece();
+        boolean whiteTurn = this.boardService.getBoard().isWhiteTurn();
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
@@ -49,7 +51,7 @@ public class BoardView extends JPanel {
             if ((currPiece.getColor() == 1 && whiteTurn)
                     || (currPiece.getColor() == 0 && !whiteTurn)) {
                 final Image i = currPiece.getImg();
-                g.drawImage(i, this.board.getCurrX(), this.board.getCurrY(), null);
+                g.drawImage(i, this.boardService.getBoard().getCurrX(), this.boardService.getBoard().getCurrY(), null);
             }
         }
     }

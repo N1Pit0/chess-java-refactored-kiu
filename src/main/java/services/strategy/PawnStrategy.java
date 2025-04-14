@@ -16,8 +16,8 @@ public class PawnStrategy extends PieceStrategy {
     }
 
     @Override
-    public boolean move(Square fin) {
-        boolean b = super.move(fin);
+    public boolean move(Square fin, Board board) {
+        boolean b = super.move(fin, board);
         wasMoved = true;
         return b;
     }

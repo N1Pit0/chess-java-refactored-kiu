@@ -25,19 +25,4 @@ public class Square {
 
     }
 
-    public boolean isOccupied() {
-        return (this.occupyingPiece != null);
-    }
-
-    public void put(Piece p) {
-        this.occupyingPiece = p;
-        p.setCurrentSquare(this);
-    }
-
-    public Piece removePiece() {
-        Piece p = this.occupyingPiece;
-        this.occupyingPiece = null;
-        return p;
-    }
-
 }

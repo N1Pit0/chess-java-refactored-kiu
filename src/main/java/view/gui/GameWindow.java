@@ -1,6 +1,7 @@
 package view.gui;
 
 import model.board.Board;
+import services.BoardService;
 import view.mouseListener.CustomBoardMouseListener;
 import view.mouseListener.CustomBoardMouseListenerImpl;
 import services.Clock;
@@ -53,7 +54,9 @@ public class GameWindow {
 
         this.board = new Board(this);
 
-        BoardView boardView = new BoardView(board);
+        BoardService boardService = new BoardService(this, board);
+
+        BoardView boardView = new BoardView(boardService);
 
         this.customBoardMouseListener = new CustomBoardMouseListenerImpl(boardView);
 
