@@ -17,7 +17,7 @@ public class RookStrategy extends PieceStrategy {
     @Override
     public List<Square> getLegalMoves(Board board) {
         LinkedList<Square> legalMoves = new LinkedList<Square>();
-        Square[][] squareArrayBoard = board.getBoard();
+        Square[][] squareArrayBoard = board.getSquareChessBoard();
 
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();

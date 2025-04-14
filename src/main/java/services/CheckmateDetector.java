@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 public class CheckmateDetector {
     private final LinkedList<Square> squares;
-    private Board b;
+    private Board board;
     private LinkedList<Piece> wPieces;
     private LinkedList<Piece> bPieces;
     private LinkedList<Square> movableSquares;
@@ -37,9 +37,9 @@ public class CheckmateDetector {
      * @param wk      chesspieces.common.Piece object representing the white king
      * @param bk      chesspieces.common.Piece object representing the black king
      */
-    public CheckmateDetector(Board b, LinkedList<Piece> wPieces,
+    public CheckmateDetector(Board board, LinkedList<Piece> wPieces,
                              LinkedList<Piece> bPieces, King wk, King bk) {
-        this.b = b;
+        this.board = board;
         this.wPieces = wPieces;
         this.bPieces = bPieces;
         this.bk = bk;
@@ -51,7 +51,7 @@ public class CheckmateDetector {
         wMoves = new HashMap<Square, List<Piece>>();
         bMoves = new HashMap<Square, List<Piece>>();
 
-        Square[][] brd = b.getBoard();
+        Square[][] brd = board.getSquareChessBoard();
 
         // add all squares to squares list and as hashmap keys
         for (int x = 0; x < 8; x++) {
@@ -95,7 +95,7 @@ public class CheckmateDetector {
                     continue;
                 }
 
-                List<Square> mvs = p.getLegalMoves(b);
+                List<Square> mvs = p.getLegalMoves(board);
                 Iterator<Square> iter = mvs.iterator();
                 while (iter.hasNext()) {
                     List<Piece> pieces = wMoves.get(iter.next());
@@ -113,7 +113,7 @@ public class CheckmateDetector {
                     continue;
                 }
 
-                List<Square> mvs = p.getLegalMoves(b);
+                List<Square> mvs = p.getLegalMoves(board);
                 Iterator<Square> iter = mvs.iterator();
                 while (iter.hasNext()) {
                     List<Piece> pieces = bMoves.get(iter.next());
@@ -205,7 +205,7 @@ public class CheckmateDetector {
      */
     private boolean canEvade(Map<Square, List<Piece>> tMoves, King tKing) {
         boolean evade = false;
-        List<Square> kingsMoves = tKing.getLegalMoves(b);
+        List<Square> kingsMoves = tKing.getLegalMoves(board);
         Iterator<Square> iterator = kingsMoves.iterator();
 
         // If king is not threatened at some square, it can evade
@@ -231,7 +231,7 @@ public class CheckmateDetector {
         if (threats.size() == 1) {
             Square sq = threats.get(0).getCurrentSquare();
 
-            if (k.getLegalMoves(b).contains(sq)) {
+            if (k.getLegalMoves(board).contains(sq)) {
                 movableSquares.add(sq);
                 if (testMove(k, sq)) {
                     capture = true;
@@ -265,7 +265,7 @@ public class CheckmateDetector {
         if (threats.size() == 1) {
             Square ts = threats.get(0).getCurrentSquare();
             Square ks = k.getCurrentSquare();
-            Square[][] brdArray = b.getBoard();
+            Square[][] brdArray = board.getSquareChessBoard();
 
             if (ks.getXNum() == ts.getXNum()) {
                 int max = Math.max(ks.getYNum(), ts.getYNum());
@@ -446,13 +446,13 @@ public class CheckmateDetector {
         boolean movetest = true;
         Square init = p.getCurrentSquare();
 
-        p.move(sq);
+        p.move(sq, board);
         update();
 
         if (p.getColor() == 0 && blackInCheck()) movetest = false;
         else if (p.getColor() == 1 && whiteInCheck()) movetest = false;
 
-        p.move(init);
+        p.move(init, board);
         if (c != null) sq.put(c);
 
         update();

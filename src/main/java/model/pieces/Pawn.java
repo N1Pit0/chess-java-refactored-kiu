@@ -16,7 +16,7 @@ public class Pawn extends Piece {
 
     @Override
     public boolean move(Square fin) {
-        boolean b = super.move(fin);
+        boolean b = super.move(fin, super.getCurrentSquare().getBoard());
         wasMoved = true;
         return b;
     }
@@ -25,7 +25,7 @@ public class Pawn extends Piece {
     public List<Square> getLegalMoves(Board b) {
         LinkedList<Square> legalMoves = new LinkedList<Square>();
 
-        Square[][] board = b.getBoard();
+        Square[][] board = b.getSquareChessBoard();
 
         int x = this.getCurrentSquare().getXNum();
         int y = this.getCurrentSquare().getYNum();

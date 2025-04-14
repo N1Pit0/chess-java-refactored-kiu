@@ -31,12 +31,12 @@ public abstract class Piece {
         }
     }
 
-    public boolean move(Square fin) {
+    public boolean move(Square fin, Board board) {
         Piece occup = fin.getOccupyingPiece();
 
         if (occup != null) {
             if (occup.getColor() == this.color) return false;
-            else fin.capture(this);
+            else board.capture(this, );
         }
 
         currentSquare.removePiece();

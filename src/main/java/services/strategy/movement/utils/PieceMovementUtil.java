@@ -9,125 +9,121 @@ import java.util.List;
 public class PieceMovementUtil {
 
     public static int[] getLinearOccupations(Square[][] board, int x, int y, Piece piece) {
-        int lastYAbove = 0;
-        int lastXRight = 7;
-        int lastYBelow = 7;
-        int lastXLeft = 0;
+        int lastYabove = 0;
+        int lastXright = 7;
+        int lastYbelow = 7;
+        int lastXleft = 0;
 
         for (int i = 0; i < y; i++) {
             if (board[i][x].isOccupied()) {
                 if (board[i][x].getOccupyingPiece().getColor() != piece.getColor()) {
-                    lastYAbove = i;
-                } else lastYAbove = i + 1;
-            }
-
-            if (board[7 - i][x].isOccupied()) {
-                if (board[7 - i][x].getOccupyingPiece().getColor() != piece.getColor()) {
-                    lastYBelow = 7 - i;
-                } else {
-                    lastYBelow = 7 - i - 1;
-                }
+                    lastYabove = i;
+                } else lastYabove = i + 1;
             }
         }
 
-//        for (int i = 7; i > y; i--) {
-//            if (board[i][x].isOccupied()) {
-//                if (board[i][x].getOccupyingPiece().getColor() != piece.getColor()) {
-//                    lastYBelow = i;
-//                } else lastYBelow = i - 1;
-//            }
-//        }
+        for (int i = 7; i > y; i--) {
+            if (board[i][x].isOccupied()) {
+                if (board[i][x].getOccupyingPiece().getColor() != piece.getColor()) {
+                    lastYbelow = i;
+                } else lastYbelow = i - 1;
+            }
+        }
 
         for (int i = 0; i < x; i++) {
             if (board[y][i].isOccupied()) {
                 if (board[y][i].getOccupyingPiece().getColor() != piece.getColor()) {
-                    lastXLeft = i;
-                } else lastXLeft = i + 1;
-            }
-
-            if (board[y][7 - i].isOccupied()) {
-                if (board[y][7 - i].getOccupyingPiece().getColor() != piece.getColor()) {
-                    lastXRight = 7 - i;
-                } else lastXRight = 7 - i - 1;
+                    lastXleft = i;
+                } else lastXleft = i + 1;
             }
         }
 
-//        for (int i = 7; i > x; i--) {
-//            if (board[y][i].isOccupied()) {
-//                if (board[y][i].getOccupyingPiece().getColor() != piece.getColor()) {
-//                    lastXRight = i;
-//                } else lastXRight = i - 1;
-//            }
-//        }
+        for (int i = 7; i > x; i--) {
+            if (board[y][i].isOccupied()) {
+                if (board[y][i].getOccupyingPiece().getColor() != piece.getColor()) {
+                    lastXright = i;
+                } else lastXright = i - 1;
+            }
+        }
 
-        return new int[]{lastYAbove, lastYBelow, lastXLeft, lastXRight};
+        int[] occups = {lastYabove, lastYbelow, lastXleft, lastXright};
+
+        return occups;
     }
 
     public static List<Square> getDiagonalOccupations(Square[][] board, int x, int y, Piece piece) {
-        LinkedList<Square> diagOccupy = new LinkedList<>();
+        LinkedList<Square> diagOccup = new LinkedList<Square>();
 
-        int xNorthWest = x - 1;
-        int xSouthWest = x - 1;
-        int xNorthEast = x + 1;
-        int xSouthEast = x + 1;
-        int yNorthWest = y - 1;
-        int ySouthWest = y + 1;
-        int yNorthEast = y - 1;
-        int ySouthEast = y + 1;
+        int xNW = x - 1;
+        int xSW = x - 1;
+        int xNE = x + 1;
+        int xSE = x + 1;
+        int yNW = y - 1;
+        int ySW = y + 1;
+        int yNE = y - 1;
+        int ySE = y + 1;
 
-        while (xNorthWest >= 0 && yNorthWest >= 0) {
-            if (board[yNorthWest][xNorthWest].isOccupied()) {
-                if (board[yNorthWest][xNorthWest].getOccupyingPiece().getColor() != piece.getColor()) {
-                    diagOccupy.add(board[yNorthWest][xNorthWest]);
+        while (xNW >= 0 && yNW >= 0) {
+            if (board[yNW][xNW].isOccupied()) {
+                if (board[yNW][xNW].getOccupyingPiece().getColor() == piece.getColor()) {
+                    break;
+                } else {
+                    diagOccup.add(board[yNW][xNW]);
+                    break;
                 }
-                break;
             } else {
-                diagOccupy.add(board[yNorthWest][xNorthWest]);
-                yNorthWest--;
-                xNorthWest--;
+                diagOccup.add(board[yNW][xNW]);
+                yNW--;
+                xNW--;
             }
         }
 
-        while (xSouthWest >= 0 && ySouthWest < 8) {
-            if (board[ySouthWest][xSouthWest].isOccupied()) {
-                if (board[ySouthWest][xSouthWest].getOccupyingPiece().getColor() != piece.getColor()) {
-                    diagOccupy.add(board[ySouthWest][xSouthWest]);
+        while (xSW >= 0 && ySW < 8) {
+            if (board[ySW][xSW].isOccupied()) {
+                if (board[ySW][xSW].getOccupyingPiece().getColor() == piece.getColor()) {
+                    break;
+                } else {
+                    diagOccup.add(board[ySW][xSW]);
+                    break;
                 }
-                break;
             } else {
-                diagOccupy.add(board[ySouthWest][xSouthWest]);
-                ySouthWest++;
-                xSouthWest--;
+                diagOccup.add(board[ySW][xSW]);
+                ySW++;
+                xSW--;
             }
         }
 
-        while (xSouthEast < 8 && ySouthEast < 8) {
-            if (board[ySouthEast][xSouthEast].isOccupied()) {
-                if (board[ySouthEast][xSouthEast].getOccupyingPiece().getColor() != piece.getColor()) {
-                    diagOccupy.add(board[ySouthEast][xSouthEast]);
+        while (xSE < 8 && ySE < 8) {
+            if (board[ySE][xSE].isOccupied()) {
+                if (board[ySE][xSE].getOccupyingPiece().getColor() == piece.getColor()) {
+                    break;
+                } else {
+                    diagOccup.add(board[ySE][xSE]);
+                    break;
                 }
-                break;
             } else {
-                diagOccupy.add(board[ySouthEast][xSouthEast]);
-                ySouthEast++;
-                xSouthEast++;
+                diagOccup.add(board[ySE][xSE]);
+                ySE++;
+                xSE++;
             }
         }
 
-        while (xNorthEast < 8 && yNorthEast >= 0) {
-            if (board[yNorthEast][xNorthEast].isOccupied()) {
-                if (board[yNorthEast][xNorthEast].getOccupyingPiece().getColor() != piece.getColor()) {
-                    diagOccupy.add(board[yNorthEast][xNorthEast]);
+        while (xNE < 8 && yNE >= 0) {
+            if (board[yNE][xNE].isOccupied()) {
+                if (board[yNE][xNE].getOccupyingPiece().getColor() == piece.getColor()) {
+                    break;
+                } else {
+                    diagOccup.add(board[yNE][xNE]);
+                    break;
                 }
-                break;
             } else {
-                diagOccupy.add(board[yNorthEast][xNorthEast]);
-                yNorthEast--;
-                xNorthEast++;
+                diagOccup.add(board[yNE][xNE]);
+                yNE--;
+                xNE++;
             }
         }
 
-        return diagOccupy;
+        return diagOccup;
     }
 
 }

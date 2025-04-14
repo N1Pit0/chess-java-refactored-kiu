@@ -18,7 +18,7 @@ public class BishopStrategy extends PieceStrategy {
     @Override
     public List<Square> getLegalMoves(Board board) {
 
-        Square[][] squareArrayBoard = board.getBoard();
+        Square[][] squareArrayBoard = board.getSquareChessBoard();
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();
 

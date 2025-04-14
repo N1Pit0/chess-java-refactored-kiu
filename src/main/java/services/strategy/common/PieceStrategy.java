@@ -4,6 +4,7 @@ import model.board.Board;
 import model.board.Square;
 import lombok.Getter;
 import model.pieces.common.Piece;
+import services.SquareService;
 
 import java.util.List;
 
@@ -15,12 +16,12 @@ public abstract class PieceStrategy {
         this.piece = piece;
     }
 
-    public boolean move(Square square) {
+    public boolean move(Square square, Board board) {
         Piece occup = square.getOccupyingPiece();
 
         if (occup != null) {
             if (occup.getColor() == piece.getColor()) return false;
-            else square.capture(piece);
+            else board.capture(piece, piece.getCurrentSquare());
         }
 
         piece.getCurrentSquare().removePiece();

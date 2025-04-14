@@ -16,7 +16,7 @@ public class Knight extends Piece {
     @Override
     public List<Square> getLegalMoves(Board b) {
         LinkedList<Square> legalMoves = new LinkedList<Square>();
-        Square[][] board = b.getBoard();
+        Square[][] board = b.getSquareChessBoard();
 
         int x = this.getCurrentSquare().getXNum();
         int y = this.getCurrentSquare().getYNum();

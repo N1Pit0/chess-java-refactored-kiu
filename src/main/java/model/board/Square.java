@@ -40,12 +40,4 @@ public class Square {
         return p;
     }
 
-    public void capture(Piece p) {
-        Piece k = getOccupyingPiece();
-        if (k.getColor() == 0) board.getBlackPieces().remove(k);
-        if (k.getColor() == 1) board.getWhitePieces().remove(k);
-        this.occupyingPiece = p;
-    }
-
-
 }

@@ -19,7 +19,7 @@ public class BoardView extends JPanel {
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                this.add(new SquareView(this.board.getBoard()[x][y])); // ??
+                this.add(new SquareView(this.board.getSquareChessBoard()[x][y])); // ??
             }
         }
 
@@ -32,7 +32,7 @@ public class BoardView extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Square[][] board = this.board.getBoard();
+        Square[][] board = this.board.getSquareChessBoard();
         Piece currPiece = this.board.getCurrPiece();
         boolean whiteTurn = this.board.isWhiteTurn();
 
