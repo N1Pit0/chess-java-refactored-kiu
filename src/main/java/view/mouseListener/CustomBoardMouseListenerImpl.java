@@ -36,9 +36,9 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
         if (squareService.isOccupied()) {
             boardService.setPiece(squareService.getOccupyingPiece());
-            if (boardService.getPiece().getPiece().getColor() == 0 && boardService.getBoard().isWhiteTurn())
+            if (boardService.getPiece().getPiece().getColor() == 0 && boardService.isWhiteTurn())
                 return;
-            if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.getBoard().isWhiteTurn())
+            if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
                 return;
             squareView.setDisplayPiece(true);
         }

@@ -26,12 +26,12 @@ public abstract class PieceStrategy {
 
         if (occupyingPiece != null) {
             if (occupyingPiece.getPiece().getColor() == piece.getColor()) return false;
-            else boardService.capture(this, this.squareService);
+            else boardService.capture(this, squareService1); //something is off either here or in capture()
         }
 
         squareService.removePiece();
         squareService = squareService1;
-        squareService.put(this);
+        squareService.put(this); // possible error here
         return true;
     }
 

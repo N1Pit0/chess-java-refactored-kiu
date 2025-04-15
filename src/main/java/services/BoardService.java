@@ -85,12 +85,12 @@ public class BoardService {
 
         squareBoard[0][1].put(new KnightStrategy(new Knight(0, squares[0][1], RESOURCES_BKNIGHT_PNG.label)));
         squareBoard[0][6].put(new KnightStrategy(new Knight(0, squares[0][6], RESOURCES_BKNIGHT_PNG.label)));
-        squareBoard[7][1].put(new KnightStrategy(new Knight(0, squares[7][1], RESOURCES_WKNIGHT_PNG.label)));
+        squareBoard[7][1].put(new KnightStrategy(new Knight(1, squares[7][1], RESOURCES_WKNIGHT_PNG.label)));
         squareBoard[7][6].put(new KnightStrategy(new Knight(1, squares[7][6], RESOURCES_WKNIGHT_PNG.label)));
 
         squareBoard[0][2].put(new BishopStrategy(new Bishop(0, squares[0][2], RESOURCES_BBISHOP_PNG.label)));
         squareBoard[0][5].put(new BishopStrategy(new Bishop(0, squares[0][5], RESOURCES_BBISHOP_PNG.label)));
-        squareBoard[7][2].put(new BishopStrategy(new Bishop(0, squares[7][2], RESOURCES_WBISHOP_PNG.label)));
+        squareBoard[7][2].put(new BishopStrategy(new Bishop(1, squares[7][2], RESOURCES_WBISHOP_PNG.label)));
         squareBoard[7][5].put(new BishopStrategy(new Bishop(1, squares[7][5], RESOURCES_WBISHOP_PNG.label)));
 
 
@@ -108,7 +108,8 @@ public class BoardService {
         PieceStrategy piece = squareService.getOccupyingPiece();
         if (piece.getPiece().getColor() == 0) getBlackPieces().remove(piece);
         if (piece.getPiece().getColor() == 1) getWhitePieces().remove(piece);
-        squareService.setOccupyingPiece(p);
+        squareService.removePiece();
+        squareService.put(p);
     }
 
 }

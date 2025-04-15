@@ -22,7 +22,7 @@ public class GameWindow {
     private JFrame gameWindow;
     private Timer timer;
 
-    private Board board;
+    private BoardView boardView;
 
     private CustomBoardMouseListener customBoardMouseListener;
 
@@ -52,11 +52,11 @@ public class GameWindow {
         gameData.setSize(gameData.getPreferredSize());
         gameWindow.add(gameData, BorderLayout.NORTH);
 
-        this.board = new Board(this);
+        Board newBoard= new Board(this);
 
-        BoardService boardService = new BoardService(this, board);
+        BoardService boardService = new BoardService(this, newBoard);
 
-        BoardView boardView = new BoardView(boardService);
+        this.boardView = new BoardView(boardService);
 
         this.customBoardMouseListener = new CustomBoardMouseListenerImpl(boardView);
 
@@ -112,7 +112,7 @@ public class GameWindow {
             timer = new Timer(1000, null);
             timer.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    boolean turn = board.isWhiteTurn();
+                    boolean turn = boardView.getBoardService().isWhiteTurn();
 
                     if (turn) {
                         whiteClock.decr();
