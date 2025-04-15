@@ -270,8 +270,7 @@ public class CheckmateDetector {
                     List<PieceStrategy> blks =
                             blockMoves.get(brdArray[i][ks.getXNum()]);
                     ConcurrentLinkedDeque<PieceStrategy> blockers =
-                            new ConcurrentLinkedDeque<>();
-                    blockers.addAll(blks);
+                            new ConcurrentLinkedDeque<>(blks);
 
                     if (!blockers.isEmpty()) {
                         movableSquares.add(brdArray[i][ks.getXNum()]);
@@ -294,8 +293,7 @@ public class CheckmateDetector {
                     List<PieceStrategy> blks =
                             blockMoves.get(brdArray[ks.getYNum()][i]);
                     ConcurrentLinkedDeque<PieceStrategy> blockers =
-                            new ConcurrentLinkedDeque<>();
-                    blockers.addAll(blks);
+                            new ConcurrentLinkedDeque<>(blks);
 
                     if (!blockers.isEmpty()) {
 

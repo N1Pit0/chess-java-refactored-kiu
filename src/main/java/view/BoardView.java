@@ -1,11 +1,9 @@
 package view;
 
-import model.board.Board;
-import model.board.Square;
 import lombok.Getter;
-import model.pieces.common.Piece;
 import services.BoardService;
 import services.SquareService;
+import services.strategy.common.PieceStrategy;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,8 +33,8 @@ public class BoardView extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         SquareService[][] squares = this.boardService.getSquareBoard();
-        Piece currPiece = this.boardService.getBoard().getCurrPiece();
-        boolean whiteTurn = this.boardService.getBoard().isWhiteTurn();
+        PieceStrategy currPiece = this.boardService.getPiece();
+        boolean whiteTurn = this.boardService.isWhiteTurn();
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
@@ -48,9 +46,9 @@ public class BoardView extends JPanel {
         }
 
         if (currPiece != null) {
-            if ((currPiece.getColor() == 1 && whiteTurn)
-                    || (currPiece.getColor() == 0 && !whiteTurn)) {
-                final Image i = currPiece.getImg();
+            if ((currPiece.getPiece().getColor() == 1 && whiteTurn)
+                    || (currPiece.getPiece().getColor() == 0 && !whiteTurn)) {
+                final Image i = currPiece.getPiece().getImg();
                 g.drawImage(i, this.boardService.getBoard().getCurrX(), this.boardService.getBoard().getCurrY(), null);
             }
         }

@@ -108,7 +108,8 @@ public class BoardService {
         PieceStrategy piece = squareService.getOccupyingPiece();
         if (piece.getPiece().getColor() == 0) getBlackPieces().remove(piece);
         if (piece.getPiece().getColor() == 1) getWhitePieces().remove(piece);
-        squareService.setOccupyingPiece(p);
+        squareService.removePiece();
+        squareService.put(p);
     }
 
 }

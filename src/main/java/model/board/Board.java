@@ -17,7 +17,6 @@ public class Board {
     private final Square[][] squareChessBoard;
     private final GameWindow gameWindow;
 
-    private boolean whiteTurn;
     private Piece currPiece;
 
     private int currX;
@@ -42,7 +41,6 @@ public class Board {
             }
         }
 
-        whiteTurn = true;
 
     }
 

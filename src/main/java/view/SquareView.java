@@ -1,6 +1,5 @@
 package view;
 
-import model.board.Square;
 import lombok.Getter;
 import lombok.Setter;
 import services.SquareService;
