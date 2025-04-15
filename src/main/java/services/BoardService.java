@@ -32,7 +32,7 @@ public class BoardService {
 
     private List<SquareService> movableSquares;
 
-    private boolean WhiteTurn;
+    private boolean whiteTurn;
 
     public BoardService(GameWindow gameWindow, Board board) {
 
@@ -56,6 +56,8 @@ public class BoardService {
                 }
             }
         }
+
+        whiteTurn = true;
 
         initializePieces();
     }

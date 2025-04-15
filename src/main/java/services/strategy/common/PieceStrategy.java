@@ -30,7 +30,7 @@ public abstract class PieceStrategy {
         }
 
         squareService.removePiece();
-        squareService.setSquare(squareService1.getSquare());
+        squareService = squareService1;
         squareService.put(this);
         return true;
     }

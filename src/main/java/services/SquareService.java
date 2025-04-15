@@ -9,7 +9,7 @@ import services.strategy.common.PieceStrategy;
 
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = "occupyingPiece")
+@EqualsAndHashCode(exclude = {"occupyingPiece"})
 public class SquareService {
 
     private Square square;
@@ -25,13 +25,14 @@ public class SquareService {
 
     public void put(PieceStrategy pieceStrategy) {
         square.setOccupyingPiece(pieceStrategy.getPiece());
-        setOccupyingPiece(pieceStrategy);
+        occupyingPiece = pieceStrategy;
         pieceStrategy.setSquareService(this);
     }
 
-    public Piece removePiece() {
-        Piece piece = square.getOccupyingPiece();
+    public PieceStrategy removePiece() {
+        PieceStrategy piece = occupyingPiece;
         square.setOccupyingPiece(null);
+        occupyingPiece = null; //here problem??
         return piece;
     }
 

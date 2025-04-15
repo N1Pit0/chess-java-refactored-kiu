@@ -1,6 +1,5 @@
 package services.strategy.movement.utils;
 
-import model.board.Square;
 import model.pieces.common.Piece;
 import services.SquareService;
 

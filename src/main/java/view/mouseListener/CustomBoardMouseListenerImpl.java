@@ -1,7 +1,5 @@
 package view.mouseListener;
 
-import model.board.Board;
-import model.board.Square;
 import services.BoardService;
 import services.SquareService;
 import view.BoardView;
@@ -10,7 +8,6 @@ import view.SquareView;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
@@ -56,7 +53,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
         if (boardService.getPiece() == null) return;
 
-        if (boardService.getPiece().getPiece().getColor() == 0 && boardService.getBoard().isWhiteTurn())
+        if (boardService.getPiece().getPiece().getColor() == 0 && boardService.isWhiteTurn())
             return;
 
         if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
@@ -87,7 +84,7 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
                 boardService.setWhiteTurn(!boardService.isWhiteTurn());
 
-                boardService.setMovableSquares(movableSquares);
+                boardService.setMovableSquares(boardService.getCkeckmateDetector().getAllowableSquares(boardService.isWhiteTurn()));
             }
 
         } else {
