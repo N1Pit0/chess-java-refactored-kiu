@@ -1,13 +1,19 @@
 package view.mouseListener;
 
+import model.enums.PieceColor;
 import services.BoardService;
+import services.CheckmateDetector;
 import services.SquareService;
+import services.strategy.common.PieceStrategy;
 import view.BoardView;
 import view.SquareView;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.List;
+
+import static model.enums.PieceColor.BLACK;
+import static model.enums.PieceColor.WHITE;
 
 public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
@@ -35,66 +41,56 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
         SquareService squareService = squareView.getSquareService();
 
         if (squareService.isOccupied()) {
-            boardService.setPiece(squareService.getOccupyingPiece());
-            if (boardService.getPiece().getPiece().getColor() == 0 && boardService.isWhiteTurn())
+            PieceStrategy pieceStrategy = squareService.getOccupyingPiece();
+            if (pieceStrategy.getPiece().getColor() == BLACK && boardService.isWhiteTurn())
                 return;
-            if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
+            if (pieceStrategy.getPiece().getColor() == WHITE && !boardService.isWhiteTurn())
                 return;
             squareView.setDisplayPiece(true);
+            boardService.setPiece(pieceStrategy);
         }
         boardView.repaint();
     }
 
     @Override
     public void handleMouseReleased(MouseEvent e) {
-        SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        SquareService squareService = squareView.getSquareService();
         BoardService boardService = boardView.getBoardService();
+        PieceStrategy currPiece = boardService.getPiece();
+        if (currPiece == null) return;
 
-        if (boardService.getPiece() == null) return;
+        List<SquareService> legalMoves = currPiece.getLegalMoves(boardService);
 
-        if (boardService.getPiece().getPiece().getColor() == 0 && boardService.isWhiteTurn())
-            return;
+        CheckmateDetector chd = new CheckmateDetector(boardService);
 
-        if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
-            return;
+        PieceColor color = boardService.getTurn()? PieceColor.BLACK : PieceColor.WHITE;
 
-        List<SquareService> legalMoves = boardService.getPiece().getLegalMoves(boardService);
+        PieceColor checkColor = boardService.getTurn()? PieceColor.WHITE : PieceColor.BLACK;
+        if(legalMoves.contains(targetSquare)){
 
-        List<SquareService> movableSquares = boardService.getCkeckmateDetector().getAllowableSquares(boardService.isWhiteTurn());
+            Move move = new Move(currPiece,currPiece.getPosition(),targetSquare);
 
-        boardService.setMovableSquares(movableSquares);
-
-        if (legalMoves.contains(squareService) && boardService.getMovableSquares().contains(squareService)
-                && boardService.getCkeckmateDetector().testMove(boardService.getPiece(), squareService)) {
-            squareView.setDisplayPiece(true);
-            boardService.getPiece().move(squareService, boardService);
-            boardService.getCkeckmateDetector().update();
-
-            if (boardService.getCkeckmateDetector().blackCheckMated()) {
-
-                setupBoardForCheckmate(boardService, 0);
-
-            } else if (boardService.getCkeckmateDetector().blackCheckMated()) {
-
-                setupBoardForCheckmate(boardService, 1);
-
-            } else {
-                boardService.setPiece(null);
-
-                boardService.setWhiteTurn(!boardService.isWhiteTurn());
-
-                boardService.setMovableSquares(boardService.getCkeckmateDetector().getAllowableSquares(boardService.isWhiteTurn()));
+            if(targetSquare.isOccupied() && targetSquare.getColor() == color){
+                move.setCapturePiece(targetSquare.getOccupyingPiece());
             }
 
-        } else {
-            squareView.setDisplayPiece(true);
-            boardService.setPiece(null);
+            currPiece.move(targetSquare,board);
+            if(chd.isInCheck(checkColor)){
+                move.undo(board);
+                System.out.println("check play another move");
+                return;
+            }
+
+            if (chd.isCheckMate(color)){
+                System.out.println("mate");
+                return;
+            }
+            board.toggleTurn();
+        }else{
+            currPiece.getPosition().setDisplay(true);
         }
 
-        boardView.repaint();
+        board.setCurrPiece(null);
     }
-
     @Override
     public void handleMouseDragged(MouseEvent e) {
         boardView.getBoardService().getBoard().setCurrX(e.getX());

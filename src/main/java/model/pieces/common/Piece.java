@@ -3,6 +3,7 @@ package model.pieces.common;
 import lombok.Getter;
 import lombok.Setter;
 import model.board.Square;
+import model.enums.PieceColor;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -13,11 +14,11 @@ import java.awt.Graphics;
 @Getter
 @Setter
 public abstract class Piece {
-    private final int color;
+    private final PieceColor color;
     private Square currentSquare;
     private BufferedImage img;
 
-    public Piece(int color, Square initSq, String img_file) {
+    public Piece(PieceColor color, Square initSq, String img_file) {
         this.color = color;
         this.currentSquare = initSq;
 
