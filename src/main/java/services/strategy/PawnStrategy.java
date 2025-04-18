@@ -1,7 +1,5 @@
 package services.strategy;
 
-import model.board.Board;
-import model.board.Square;
 import model.pieces.common.Piece;
 import services.BoardService;
 import services.SquareService;

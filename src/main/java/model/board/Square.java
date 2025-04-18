@@ -7,7 +7,7 @@ import model.pieces.common.Piece;
 
 @Getter
 @Setter
-@EqualsAndHashCode(exclude = {"board", "color", "occupyingPiece"}, callSuper = false)
+@EqualsAndHashCode(exclude = {"board", "color", "occupyingPiece"})
 public class Square {
     private final int color;
     private Board board;

@@ -1,11 +1,8 @@
 package services;
 
-import model.board.Board;
 import model.board.Square;
 import model.pieces.Bishop;
-import model.pieces.King;
 import model.pieces.Queen;
-import model.pieces.common.Piece;
 import services.strategy.KingStrategy;
 import services.strategy.common.PieceStrategy;
 
@@ -78,14 +75,14 @@ public class CheckmateDetector {
 
         // empty moves and movable squares at each update
         for (List<PieceStrategy> pieces : wMoves.values()) {
-            pieces.removeAll(pieces);
+            pieces.clear();
         }
 
         for (List<PieceStrategy> pieces : bMoves.values()) {
-            pieces.removeAll(pieces);
+            pieces.clear();
         }
 
-        movableSquares.removeAll(movableSquares);
+        movableSquares.clear();
 
         // Add each move white and black can make to map
         while (wIter.hasNext()) {
@@ -323,8 +320,7 @@ public class CheckmateDetector {
                         List<PieceStrategy> blks =
                                 blockMoves.get(brdArray[tY][i]);
                         ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>();
-                        blockers.addAll(blks);
+                                new ConcurrentLinkedDeque<>(blks);
 
                         if (!blockers.isEmpty()) {
                             movableSquares.add(brdArray[tY][i]);
@@ -344,8 +340,7 @@ public class CheckmateDetector {
                         List<PieceStrategy> blks =
                                 blockMoves.get(brdArray[tY][i]);
                         ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>();
-                        blockers.addAll(blks);
+                                new ConcurrentLinkedDeque<>(blks);
 
                         if (!blockers.isEmpty()) {
                             movableSquares.add(brdArray[tY][i]);
@@ -365,8 +360,7 @@ public class CheckmateDetector {
                         List<PieceStrategy> blks =
                                 blockMoves.get(brdArray[tY][i]);
                         ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>();
-                        blockers.addAll(blks);
+                                new ConcurrentLinkedDeque<>(blks);
 
                         if (!blockers.isEmpty()) {
                             movableSquares.add(brdArray[tY][i]);
@@ -386,8 +380,7 @@ public class CheckmateDetector {
                         List<PieceStrategy> blks =
                                 blockMoves.get(brdArray[tY][i]);
                         ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>();
-                        blockers.addAll(blks);
+                                new ConcurrentLinkedDeque<>(blks);
 
                         if (!blockers.isEmpty()) {
                             movableSquares.add(brdArray[tY][i]);
@@ -416,7 +409,7 @@ public class CheckmateDetector {
      * @return List of squares that the player can move into.
      */
     public List<SquareService> getAllowableSquares(boolean b) {
-        movableSquares.removeAll(movableSquares);
+        movableSquares.clear();
         if (whiteInCheck()) {
             whiteCheckMated();
         } else if (blackInCheck()) {

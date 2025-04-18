@@ -2,7 +2,6 @@ package view;
 
 import lombok.Getter;
 import services.BoardService;
-import services.SquareService;
 import services.strategy.common.PieceStrategy;
 
 import javax.swing.*;
@@ -11,15 +10,19 @@ import java.awt.*;
 @Getter
 public class BoardView extends JPanel {
     private final BoardService boardService;
+    private final SquareView[][] squareViewsTwoDArray;
 
     public BoardView(BoardService boardService) {
         this.boardService = boardService;
 
         setLayout(new GridLayout(8, 8, 0, 0));
+        squareViewsTwoDArray = new SquareView[8][8];
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                this.add(new SquareView(getBoardService().getSquareBoard()[x][y])); // ??
+                SquareView squareView = new SquareView(getBoardService().getSquareBoard()[x][y]);
+                this.add(squareView); // ??
+                squareViewsTwoDArray[x][y] = squareView;
             }
         }
 
@@ -32,14 +35,12 @@ public class BoardView extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        SquareService[][] squares = this.boardService.getSquareBoard();
         PieceStrategy currPiece = this.boardService.getPiece();
         boolean whiteTurn = this.boardService.isWhiteTurn();
 
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                SquareService squareService = squares[y][x];
-                SquareView sqView = new SquareView(squareService);
+                SquareView sqView = squareViewsTwoDArray[y][x];
                 sqView.setDisplayPiece(true);
                 sqView.paintComponent(g);
             }

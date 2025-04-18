@@ -48,12 +48,16 @@ public class BoardService {
             for (int y = 0; y < 8; y++) {
                 int xMod = x % 2;
                 int yMod = y % 2;
+                SquareService newSquareService;
 
                 if ((xMod == 0 && yMod == 0) || (xMod == 1 && yMod == 1)) {
-                    squareBoard[x][y] = new SquareService(new Square(this.board, 1, y, x));
+                    newSquareService = new SquareService(new Square(this.board, 1, y, x));
+
                 } else {
-                    squareBoard[x][y] = new SquareService(new Square(this.board, 0, y, x));
+                    newSquareService = new SquareService(new Square(this.board, 0, y, x));
                 }
+                squareBoard[x][y] = newSquareService;
+                board.getSquareChessBoard()[x][y] = newSquareService.getSquare();
             }
         }
 
