@@ -1,12 +1,10 @@
 package services.strategy;
 
-import model.board.Board;
-import model.board.Square;
 import model.pieces.common.Piece;
 import services.BoardService;
 import services.SquareService;
 import services.strategy.common.PieceStrategy;
-import services.strategy.movement.utils.PieceMovementUtil;
+import services.movement.utils.PieceMovementUtil;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,9 +23,9 @@ public class QueenStrategy extends PieceStrategy {
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();
 
-        int[] occups = PieceMovementUtil.getLinearOccupations(squareArrayBoard, x, y, super.getPiece());
+        List<SquareService> occups = PieceMovementUtil.getLinearMoves(squareArrayBoard, this);
 
-        for (int i = occups[0]; i <= occups[1]; i++) {
+        for (int i = occups.get(0); i <= occups[1]; i++) {
             if (i != y) legalMoves.add(squareArrayBoard[i][x]);
         }
 
@@ -35,7 +33,7 @@ public class QueenStrategy extends PieceStrategy {
             if (i != x) legalMoves.add(squareArrayBoard[y][i]);
         }
 
-        List<SquareService> bMoves = PieceMovementUtil.getDiagonalOccupations(squareArrayBoard, x, y, super.getPiece());
+        List<SquareService> bMoves = PieceMovementUtil.getDiagonalMoves(squareArrayBoard, this);
 
         legalMoves.addAll(bMoves);
 

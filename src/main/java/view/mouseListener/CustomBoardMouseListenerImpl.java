@@ -4,6 +4,7 @@ import model.enums.PieceColor;
 import services.BoardService;
 import services.CheckmateDetector;
 import services.SquareService;
+import services.movement.utils.MoveManager;
 import services.strategy.common.PieceStrategy;
 import view.BoardView;
 import view.SquareView;
@@ -56,6 +57,10 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
     public void handleMouseReleased(MouseEvent e) {
         BoardService boardService = boardView.getBoardService();
         PieceStrategy currPiece = boardService.getPiece();
+
+        SquareView targetSquareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
+        SquareService targetSquareService = targetSquareView.getSquareService();
+
         if (currPiece == null) return;
 
         List<SquareService> legalMoves = currPiece.getLegalMoves(boardService);
@@ -65,17 +70,18 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
         PieceColor color = boardService.getTurn()? PieceColor.BLACK : PieceColor.WHITE;
 
         PieceColor checkColor = boardService.getTurn()? PieceColor.WHITE : PieceColor.BLACK;
-        if(legalMoves.contains(targetSquare)){
+        if(legalMoves.contains(targetSquareService)){
 
-            Move move = new Move(currPiece,currPiece.getPosition(),targetSquare);
+            MoveManager move = new MoveManager(currPiece,currPiece.getSquareService(),targetSquareService);
 
-            if(targetSquare.isOccupied() && targetSquare.getColor() == color){
-                move.setCapturePiece(targetSquare.getOccupyingPiece());
+            if(targetSquareService.isOccupied()
+                    && targetSquareService.getOccupyingPiece().getPiece().getColor() == color){
+                move.setCapturePiece(targetSquareService.getOccupyingPiece());
             }
 
-            currPiece.move(targetSquare,board);
+            currPiece.move(targetSquareService,boardService);
             if(chd.isInCheck(checkColor)){
-                move.undo(board);
+                move.undo(boardService);
                 System.out.println("check play another move");
                 return;
             }
@@ -84,12 +90,12 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
                 System.out.println("mate");
                 return;
             }
-            board.toggleTurn();
+            boardService.toggleTurn();
         }else{
-            currPiece.getPosition().setDisplay(true);
+            targetSquareView.setDisplayPiece(true);
         }
 
-        board.setCurrPiece(null);
+        boardService.setPiece(null);
     }
     @Override
     public void handleMouseDragged(MouseEvent e) {

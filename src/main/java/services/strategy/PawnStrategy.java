@@ -1,7 +1,6 @@
 package services.strategy;
 
-import model.board.Board;
-import model.board.Square;
+import model.enums.PieceColor;
 import model.pieces.common.Piece;
 import services.BoardService;
 import services.SquareService;
@@ -9,6 +8,9 @@ import services.strategy.common.PieceStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import static model.enums.PieceColor.BLACK;
+import static model.enums.PieceColor.WHITE;
 
 public class PawnStrategy extends PieceStrategy {
     private boolean wasMoved;
@@ -32,9 +34,9 @@ public class PawnStrategy extends PieceStrategy {
 
         int x = super.getPiece().getCurrentSquare().getXNum();
         int y = super.getPiece().getCurrentSquare().getYNum();
-        int c = super.getPiece().getColor();
+        PieceColor c = super.getPiece().getColor();
 
-        if (c == 0) {
+        if (c == BLACK) {
             if (!wasMoved) {
                 if (!squareArrayBoard[y + 2][x].isOccupied()) {
                     legalMoves.add(squareArrayBoard[y + 2][x]);
@@ -60,7 +62,7 @@ public class PawnStrategy extends PieceStrategy {
             }
         }
 
-        if (c == 1) {
+        if (c == WHITE) {
             if (!wasMoved) {
                 if (!squareArrayBoard[y - 2][x].isOccupied()) {
                     legalMoves.add(squareArrayBoard[y - 2][x]);

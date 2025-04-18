@@ -8,6 +8,9 @@ import services.strategy.common.PieceStrategy;
 import javax.swing.*;
 import java.awt.*;
 
+import static model.enums.PieceColor.BLACK;
+import static model.enums.PieceColor.WHITE;
+
 @Getter
 public class BoardView extends JPanel {
     private final BoardService boardService;
@@ -46,8 +49,8 @@ public class BoardView extends JPanel {
         }
 
         if (currPiece != null) {
-            if ((currPiece.getPiece().getColor() == 1 && whiteTurn)
-                    || (currPiece.getPiece().getColor() == 0 && !whiteTurn)) {
+            if ((currPiece.getPiece().getColor() == WHITE && whiteTurn)
+                    || (currPiece.getPiece().getColor() == BLACK && !whiteTurn)) {
                 final Image i = currPiece.getPiece().getImg();
                 g.drawImage(i, this.boardService.getBoard().getCurrX(), this.boardService.getBoard().getCurrY(), null);
             }

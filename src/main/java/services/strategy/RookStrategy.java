@@ -1,12 +1,10 @@
 package services.strategy;
 
-import model.board.Board;
-import model.board.Square;
 import model.pieces.common.Piece;
 import services.BoardService;
 import services.SquareService;
 import services.strategy.common.PieceStrategy;
-import services.strategy.movement.utils.PieceMovementUtil;
+import services.movement.utils.PieceMovementUtil;
 
 import java.util.LinkedList;
 import java.util.List;

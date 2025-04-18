@@ -128,4 +128,8 @@ public class BoardService {
         return whiteTurn;
     }
 
+    public void toggleTurn() {
+        whiteTurn = !whiteTurn;
+    }
+
 }
