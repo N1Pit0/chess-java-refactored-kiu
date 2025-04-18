@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import model.board.Board;
 import model.board.Square;
+import model.enums.PieceColor;
 import model.pieces.*;
-import model.pieces.common.Piece;
 import services.strategy.*;
 import services.strategy.common.PieceStrategy;
 import view.gui.GameWindow;
@@ -13,6 +13,8 @@ import view.gui.GameWindow;
 import java.util.LinkedList;
 import java.util.List;
 
+import static jdk.internal.org.jline.utils.AttributedStyle.BLACK;
+import static jdk.internal.org.jline.utils.AttributedStyle.WHITE;
 import static model.enums.ImagePath.*;
 
 @Getter
@@ -33,6 +35,9 @@ public class BoardService {
     private List<SquareService> movableSquares;
 
     private boolean whiteTurn;
+
+    private PieceStrategy blackKing;
+    private PieceStrategy whiteKing;
 
     public BoardService(GameWindow gameWindow, Board board) {
 
@@ -66,32 +71,32 @@ public class BoardService {
         Square[][] squares = board.getSquareChessBoard();
 
         for (int x = 0; x < 8; x++) {
-            squareBoard[1][x].put(new PawnStrategy(new Pawn(0, squares[1][x], RESOURCES_BPAWN_PNG.label)));
-            squareBoard[6][x].put(new PawnStrategy(new Pawn(1, squares[6][x], RESOURCES_WPAWN_PNG.label)));
+            squareBoard[1][x].put(new PawnStrategy(new Pawn(BLACK, squares[1][x], RESOURCES_BPAWN_PNG.label)));
+            squareBoard[6][x].put(new PawnStrategy(new Pawn(WHITE, squares[6][x], RESOURCES_WPAWN_PNG.label)));
         }
 
-        squareBoard[7][3].put(new QueenStrategy(new Queen(1, squares[7][3], RESOURCES_WQUEEN_PNG.label)));
-        squareBoard[0][3].put(new QueenStrategy(new Queen(0, squares[0][3], RESOURCES_BQUEEN_PNG.label)));
+        squareBoard[7][3].put(new QueenStrategy(new Queen(WHITE, squares[7][3], RESOURCES_WQUEEN_PNG.label)));
+        squareBoard[0][3].put(new QueenStrategy(new Queen(BLACK, squares[0][3], RESOURCES_BQUEEN_PNG.label)));
 
-        KingStrategy bk = new KingStrategy(new King(0, squares[0][4], RESOURCES_BKING_PNG.label));
-        KingStrategy wk = new KingStrategy(new King(1, squares[7][4], RESOURCES_WKING_PNG.label));
-        squareBoard[0][4].put(bk);
-        squareBoard[7][4].put(wk);
+        blackKing = new KingStrategy(new King(0, squares[0][4], RESOURCES_BKING_PNG.label));
+        whiteKing = new KingStrategy(new King(WHITE, squares[7][4], RESOURCES_WKING_PNG.label));
+        squareBoard[0][4].put(blackKing);
+        squareBoard[7][4].put(whiteKing);
 
         squareBoard[0][0].put(new RookStrategy(new Rook(0, squares[0][0], RESOURCES_BROOK_PNG.label)));
         squareBoard[0][7].put(new RookStrategy(new Rook(0, squares[0][7], RESOURCES_BROOK_PNG.label)));
-        squareBoard[7][0].put(new RookStrategy(new Rook(1, squares[7][0], RESOURCES_WROOK_PNG.label)));
-        squareBoard[7][7].put(new RookStrategy(new Rook(1, squares[7][0], RESOURCES_WROOK_PNG.label)));
+        squareBoard[7][0].put(new RookStrategy(new Rook(WHITE, squares[7][0], RESOURCES_WROOK_PNG.label)));
+        squareBoard[7][7].put(new RookStrategy(new Rook(WHITE, squares[7][0], RESOURCES_WROOK_PNG.label)));
 
         squareBoard[0][1].put(new KnightStrategy(new Knight(0, squares[0][1], RESOURCES_BKNIGHT_PNG.label)));
         squareBoard[0][6].put(new KnightStrategy(new Knight(0, squares[0][6], RESOURCES_BKNIGHT_PNG.label)));
-        squareBoard[7][1].put(new KnightStrategy(new Knight(0, squares[7][1], RESOURCES_WKNIGHT_PNG.label)));
-        squareBoard[7][6].put(new KnightStrategy(new Knight(1, squares[7][6], RESOURCES_WKNIGHT_PNG.label)));
+        squareBoard[7][1].put(new KnightStrategy(new Knight(WHITE, squares[7][1], RESOURCES_WKNIGHT_PNG.label)));
+        squareBoard[7][6].put(new KnightStrategy(new Knight(WHITE, squares[7][6], RESOURCES_WKNIGHT_PNG.label)));
 
         squareBoard[0][2].put(new BishopStrategy(new Bishop(0, squares[0][2], RESOURCES_BBISHOP_PNG.label)));
         squareBoard[0][5].put(new BishopStrategy(new Bishop(0, squares[0][5], RESOURCES_BBISHOP_PNG.label)));
-        squareBoard[7][2].put(new BishopStrategy(new Bishop(0, squares[7][2], RESOURCES_WBISHOP_PNG.label)));
-        squareBoard[7][5].put(new BishopStrategy(new Bishop(1, squares[7][5], RESOURCES_WBISHOP_PNG.label)));
+        squareBoard[7][2].put(new BishopStrategy(new Bishop(WHITE, squares[7][2], RESOURCES_WBISHOP_PNG.label)));
+        squareBoard[7][5].put(new BishopStrategy(new Bishop(WHITE, squares[7][5], RESOURCES_WBISHOP_PNG.label)));
 
 
         for (int y = 0; y < 2; y++) {
@@ -101,7 +106,7 @@ public class BoardService {
             }
         }
 
-        ckeckmateDetector = new CheckmateDetector(this, whitePieces, blackPieces, wk, bk);
+//        ckeckmateDetector = new CheckmateDetector(this, whitePieces, blackPieces, whiteKing, blackKing);
     }
 
     public void capture(PieceStrategy p, SquareService squareService) {
@@ -110,6 +115,19 @@ public class BoardService {
         if (piece.getPiece().getColor() == 1) getWhitePieces().remove(piece);
         squareService.removePiece();
         squareService.put(p);
+    }
+
+    public boolean isSquareUnderThreat(Square position, PieceColor color){
+
+        List<String> bb = blackPieces.stream().flatMap(x->x.getLegalMoves(this).stream().map(y->y.getPosition().toAlgebraic())).toList();
+        List<String> ww = whitePieces.stream().flatMap(x->x.getLegalMoves(this).stream().map(y->y.getPosition().toAlgebraic())).toList();
+
+
+
+        return switch (color) {
+            case WHITE -> blackPieces.stream().anyMatch(piece -> piece.getLegalMoves(this).contains(position));
+            case BLACK -> whitePieces.stream().anyMatch(piece -> piece.getLegalMoves(this).contains(position));
+        };
     }
 
 }

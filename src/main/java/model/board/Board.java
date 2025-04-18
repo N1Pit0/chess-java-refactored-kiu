@@ -6,26 +6,20 @@ import model.pieces.common.Piece;
 import services.CheckmateDetector;
 import view.gui.GameWindow;
 
-import java.util.LinkedList;
-import java.util.List;
 
 
 @Getter
 @Setter
 public class Board {
-    // Logical and graphical representations of board
     private final Square[][] squareChessBoard;
-    private final GameWindow gameWindow;
 
     private Piece currPiece;
 
     private int currX;
     private int currY;
 
-    private CheckmateDetector ckeckmateDetector;
 
-    public Board(GameWindow gameWindow) {
-        this.gameWindow = gameWindow;
+    public Board() {
         squareChessBoard = new Square[8][8];
 
         for (int x = 0; x < 8; x++) {
