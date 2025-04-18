@@ -52,7 +52,7 @@ public class GameWindow {
         gameData.setSize(gameData.getPreferredSize());
         gameWindow.add(gameData, BorderLayout.NORTH);
 
-        Board newBoard= new Board(this);
+        Board newBoard= new Board();
 
         BoardService boardService = new BoardService(newBoard, this);
 

@@ -55,10 +55,17 @@ public class BoardService {
      * Initializes the `SquareService` grid and syncs it with the `Square` grid from the model.
      */
     private void initializeSquares() {
+        Square[][] modelSquares = board.getSquareChessBoard();
+
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                Square modelSquare = board.getSquareChessBoard()[x][y];
-                SquareService squareService = new SquareService(modelSquare);
+                // Ensure each square is properly initialized
+                Square modelSquare = modelSquares[x][y];
+                if (modelSquare == null) {
+                    throw new IllegalStateException("Square is not initialized at (" + x + ", " + y + ")");
+                }
+
+                SquareService squareService = new SquareService(modelSquare); // Map to service layer
                 squareBoard[x][y] = squareService;
             }
         }

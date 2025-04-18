@@ -24,6 +24,10 @@ public class SquareService {
     }
 
     public void put(PieceStrategy pieceStrategy) {
+        if (square == null) {
+            throw new IllegalStateException("Cannot place a piece on a null square!");
+        }
+
         square.setOccupyingPiece(pieceStrategy.getPiece());
         occupyingPiece = pieceStrategy;
         pieceStrategy.setSquareService(this);

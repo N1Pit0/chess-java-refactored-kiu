@@ -17,7 +17,6 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
     private final BoardMouseMotionListener boardMouseMotionListener;
 
     public CustomBoardMouseListenerImpl(BoardView boardView) {
-
         this.boardView = boardView;
         this.boardMouseListener = new BoardMouseListener(this);
         this.boardMouseMotionListener = new BoardMouseMotionListener(this);
@@ -29,80 +28,59 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
     public void handleMousePressed(MouseEvent e) {
         BoardService boardService = boardView.getBoardService();
 
-        boardService.getBoard().setCurrX(e.getX());
-        boardService.getBoard().setCurrY(e.getY());
+        // Calculate the clicked square based on the mouse position
+        Point clickPoint = e.getPoint();
+        SquareView clickedSquareView = (SquareView) boardView.getComponentAt(clickPoint);
+        if (clickedSquareView == null) return; // Ignore invalid clicks
 
-        SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        SquareService squareService = squareView.getSquareService();
+        SquareService clickedSquare = clickedSquareView.getSquareService();
 
-        if (squareService.isOccupied()) {
-            boardService.setPiece(squareService.getOccupyingPiece());
-            if (boardService.getPiece().getPiece().getColor() == 0 && boardService.isWhiteTurn())
-                return;
-            if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
-                return;
-            squareView.setDisplayPiece(true);
+        // Select the piece on the clicked square if it's valid and matches the current turn
+        if (clickedSquare.isOccupied()) {
+            PieceStrategy clickedPiece = clickedSquare.getOccupyingPiece();
+            if ((clickedPiece.getPiece().getColor() == 1 && boardService.isWhiteTurn()) ||
+                    (clickedPiece.getPiece().getColor() == 0 && !boardService.isWhiteTurn())) {
+                boardService.setPiece(clickedPiece); // Select the piece
+            }
         }
-        boardView.repaint();
     }
 
     @Override
     public void handleMouseReleased(MouseEvent e) {
-        SquareView targetSquareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        SquareService targetSquare = targetSquareView.getSquareService();
         BoardService boardService = boardView.getBoardService();
         PieceStrategy selectedPiece = boardService.getPiece();
 
-        // Abort if no piece is selected
-        if (selectedPiece == null) return;
+        if (selectedPiece == null) return; // Ignore if no piece selected
 
-        // Ensure turn validation
-        if ((selectedPiece.getPiece().getColor() == 0 && boardService.isWhiteTurn()) ||
-                (selectedPiece.getPiece().getColor() == 1 && !boardService.isWhiteTurn())) {
+        // Calculate the target square
+        Point releasePoint = e.getPoint();
+        SquareView targetSquareView = (SquareView) boardView.getComponentAt(releasePoint);
+        if (targetSquareView == null) {
+            boardView.clearMousePosition(); // Reset drag
+            boardView.repaint();
             return;
         }
 
-        // Get the piece's available legal moves
+        SquareService targetSquare = targetSquareView.getSquareService();
+
+        // Validate and execute the move
         List<SquareService> legalMoves = selectedPiece.getLegalMoves(boardService);
-
-        // Ensure the move is valid and won't leave the king in check
-        if (legalMoves.contains(targetSquare) &&
-                boardService.getCheckmateDetector().testMove(selectedPiece, targetSquare)) {
-
-            // Execute the move, update game state
+        if (legalMoves.contains(targetSquare) && boardService.getCheckmateDetector().testMove(selectedPiece, targetSquare)) {
             selectedPiece.move(targetSquare, boardService);
             boardService.updateGameState();
-
-            // Check for checkmate
-            if (boardService.getCheckmateDetector().blackCheckMated()) {
-                setupBoardForCheckmate(boardService, 0);
-            } else if (boardService.getCheckmateDetector().whiteCheckMated()) {
-                setupBoardForCheckmate(boardService, 1);
-            } else {
-                boardService.setPiece(null);
-                boardService.toggleTurn(); // Toggle player turn
-            }
-        } else {
-            // Illegal move, deselect the piece
-            boardService.setPiece(null);
+            boardService.toggleTurn();
         }
 
-        // Redraw the board
+        // Clear selection and reset mouse position
+        boardService.setPiece(null);
+        boardView.clearMousePosition();
         boardView.repaint();
     }
 
     @Override
     public void handleMouseDragged(MouseEvent e) {
-        boardView.getBoardService().getBoard().setCurrX(e.getX());
-        boardView.getBoardService().getBoard().setCurrY(e.getY());
+        // Update mouse position for dragging
+        boardView.updateMousePosition(e.getX(), e.getY());
         boardView.repaint();
-    }
-
-    private void setupBoardForCheckmate(BoardService board, int colorCheckMated) {
-        board.setPiece(null);
-        boardView.repaint();
-        boardView.removeMouseListener(boardMouseListener);
-        boardView.removeMouseMotionListener(boardMouseMotionListener);
-        board.getGameWindow().checkmateOccurred(colorCheckMated);
     }
 }
