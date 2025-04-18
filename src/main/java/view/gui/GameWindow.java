@@ -54,7 +54,7 @@ public class GameWindow {
 
         Board newBoard= new Board(this);
 
-        BoardService boardService = new BoardService(this, newBoard);
+        BoardService boardService = new BoardService(newBoard, this);
 
         this.boardView = new BoardView(boardService);
 

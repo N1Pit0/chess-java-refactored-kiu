@@ -2,6 +2,7 @@ package view.mouseListener;
 
 import services.BoardService;
 import services.SquareService;
+import services.strategy.common.PieceStrategy;
 import view.BoardView;
 import view.SquareView;
 
@@ -47,51 +48,46 @@ public class CustomBoardMouseListenerImpl implements CustomBoardMouseListener {
 
     @Override
     public void handleMouseReleased(MouseEvent e) {
-        SquareView squareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
-        SquareService squareService = squareView.getSquareService();
+        SquareView targetSquareView = (SquareView) boardView.getComponentAt(new Point(e.getX(), e.getY()));
+        SquareService targetSquare = targetSquareView.getSquareService();
         BoardService boardService = boardView.getBoardService();
+        PieceStrategy selectedPiece = boardService.getPiece();
 
-        if (boardService.getPiece() == null) return;
+        // Abort if no piece is selected
+        if (selectedPiece == null) return;
 
-        if (boardService.getPiece().getPiece().getColor() == 0 && boardService.isWhiteTurn())
+        // Ensure turn validation
+        if ((selectedPiece.getPiece().getColor() == 0 && boardService.isWhiteTurn()) ||
+                (selectedPiece.getPiece().getColor() == 1 && !boardService.isWhiteTurn())) {
             return;
+        }
 
-        if (boardService.getPiece().getPiece().getColor() == 1 && !boardService.isWhiteTurn())
-            return;
+        // Get the piece's available legal moves
+        List<SquareService> legalMoves = selectedPiece.getLegalMoves(boardService);
 
-        List<SquareService> legalMoves = boardService.getPiece().getLegalMoves(boardService);
+        // Ensure the move is valid and won't leave the king in check
+        if (legalMoves.contains(targetSquare) &&
+                boardService.getCheckmateDetector().testMove(selectedPiece, targetSquare)) {
 
-        List<SquareService> movableSquares = boardService.getCkeckmateDetector().getAllowableSquares(boardService.isWhiteTurn());
+            // Execute the move, update game state
+            selectedPiece.move(targetSquare, boardService);
+            boardService.updateGameState();
 
-        boardService.setMovableSquares(movableSquares);
-
-        if (legalMoves.contains(squareService) && boardService.getMovableSquares().contains(squareService)
-                && boardService.getCkeckmateDetector().testMove(boardService.getPiece(), squareService)) {
-            squareView.setDisplayPiece(true);
-            boardService.getPiece().move(squareService, boardService);
-            boardService.getCkeckmateDetector().update();
-
-            if (boardService.getCkeckmateDetector().blackCheckMated()) {
-
+            // Check for checkmate
+            if (boardService.getCheckmateDetector().blackCheckMated()) {
                 setupBoardForCheckmate(boardService, 0);
-
-            } else if (boardService.getCkeckmateDetector().blackCheckMated()) {
-
+            } else if (boardService.getCheckmateDetector().whiteCheckMated()) {
                 setupBoardForCheckmate(boardService, 1);
-
             } else {
                 boardService.setPiece(null);
-
-                boardService.setWhiteTurn(!boardService.isWhiteTurn());
-
-                boardService.setMovableSquares(boardService.getCkeckmateDetector().getAllowableSquares(boardService.isWhiteTurn()));
+                boardService.toggleTurn(); // Toggle player turn
             }
-
         } else {
-            squareView.setDisplayPiece(true);
+            // Illegal move, deselect the piece
             boardService.setPiece(null);
         }
 
+        // Redraw the board
         boardView.repaint();
     }
 

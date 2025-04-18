@@ -1,450 +1,216 @@
 package services;
 
 import model.board.Square;
-import model.pieces.Bishop;
-import model.pieces.Queen;
+import model.pieces.common.Piece;
 import services.strategy.KingStrategy;
 import services.strategy.common.PieceStrategy;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
 
 /**
- * Component of the Chess game that detects check mates in the game.
- *
- * @author Jussi Lundstedt
+ * Detects and handles check and checkmate logic in the chess game.
  */
 public class CheckmateDetector {
-    private final List<SquareService> squares;
-    private BoardService board;
-    private List<PieceStrategy> wPieces;
-    private List<PieceStrategy> bPieces;
-    private List<SquareService> movableSquares;
-    private KingStrategy bk;
-    private KingStrategy wk;
-    private HashMap<SquareService, List<PieceStrategy>> wMoves;
-    private HashMap<SquareService, List<PieceStrategy>> bMoves;
+    private final BoardService boardService;
 
-    /**
-     * Constructs a new instance of services.CheckmateDetector on a given board. By
-     * convention should be called when the board is in its initial state.
-     *
-     * @param board       The board which the detector monitors
-     * @param wPieces White pieces on the board.
-     * @param bPieces Black pieces on the board.
-     * @param wk      chesspieces.common.Piece object representing the white king
-     * @param bk      chesspieces.common.Piece object representing the black king
-     */
-    public CheckmateDetector(BoardService board, List<PieceStrategy> wPieces,
-                             List<PieceStrategy> bPieces, KingStrategy wk, KingStrategy bk) {
-        this.board = board;
-        this.wPieces = wPieces;
-        this.bPieces = bPieces;
-        this.bk = bk;
-        this.wk = wk;
+    private final List<PieceStrategy> whitePieces;
+    private final List<PieceStrategy> blackPieces;
 
-        // Initialize other fields
-        squares = new LinkedList<>();
-        movableSquares = new LinkedList<>();
-        wMoves = new HashMap<>();
-        bMoves = new HashMap<>();
+    private final KingStrategy whiteKing;
+    private final KingStrategy blackKing;
 
-        SquareService[][] brd = board.getSquareBoard();
+    private final List<SquareService> allSquares; // All squares on the board
+    private final Map<SquareService, List<PieceStrategy>> whiteMoves; // Moves white pieces can make
+    private final Map<SquareService, List<PieceStrategy>> blackMoves; // Moves black pieces can make
 
-        // add all squares to squares list and as hashmap keys
+    public CheckmateDetector(BoardService boardService, List<PieceStrategy> whitePieces,
+                             List<PieceStrategy> blackPieces, KingStrategy whiteKing, KingStrategy blackKing) {
+        this.boardService = boardService;
+        this.whitePieces = whitePieces;
+        this.blackPieces = blackPieces;
+        this.whiteKing = whiteKing;
+        this.blackKing = blackKing;
+
+        this.allSquares = new ArrayList<>();
+        SquareService[][] squareBoard = boardService.getSquareBoard();
+
+        this.whiteMoves = new HashMap<>();
+        this.blackMoves = new HashMap<>();
+
+        // Initialize all squares and their move maps
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                squares.add(brd[y][x]);
-                wMoves.put(brd[y][x], new LinkedList<>());
-                bMoves.put(brd[y][x], new LinkedList<>());
+                SquareService square = squareBoard[y][x];
+                allSquares.add(square);
+                whiteMoves.put(square, new LinkedList<>());
+                blackMoves.put(square, new LinkedList<>());
             }
         }
 
-        // update situation
+        // Update the initial board state
         update();
     }
 
     /**
-     * Updates the object with the current situation of the game.
+     * Updates the checkmate detector’s knowledge of the current game state.
+     * This recalculates all possible moves for white and black pieces.
      */
     public void update() {
-        // Iterators through pieces
-        Iterator<PieceStrategy> wIter = wPieces.iterator();
-        Iterator<PieceStrategy> bIter = bPieces.iterator();
+        // Clear previous moves
+        whiteMoves.values().forEach(List::clear);
+        blackMoves.values().forEach(List::clear);
 
-        // empty moves and movable squares at each update
-        for (List<PieceStrategy> pieces : wMoves.values()) {
-            pieces.clear();
-        }
-
-        for (List<PieceStrategy> pieces : bMoves.values()) {
-            pieces.clear();
-        }
-
-        movableSquares.clear();
-
-        // Add each move white and black can make to map
-        while (wIter.hasNext()) {
-            PieceStrategy p = wIter.next();
-
-            if (p.getSquareService().getSquare() == null) {
-                wIter.remove();
+        // Update moves for white pieces
+        for (Iterator<PieceStrategy> iterator = whitePieces.iterator(); iterator.hasNext(); ) {
+            PieceStrategy piece = iterator.next();
+            if (piece.getSquareService().getSquare() == null) {
+                iterator.remove(); // Remove dead/invalid pieces
                 continue;
             }
 
-            List<SquareService> mvs = p.getLegalMoves(board);
-            for (SquareService mv : mvs) {
-                List<PieceStrategy> pieces = wMoves.get(mv);
-                pieces.add(p);
+            List<SquareService> moves = piece.getLegalMoves(boardService);
+            for (SquareService move : moves) {
+                whiteMoves.get(move).add(piece);
             }
         }
 
-        while (bIter.hasNext()) {
-            PieceStrategy p = bIter.next();
-
-            if (p.getSquareService().getSquare() == null) {
-                wIter.remove();
+        // Update moves for black pieces
+        for (Iterator<PieceStrategy> iterator = blackPieces.iterator(); iterator.hasNext(); ) {
+            PieceStrategy piece = iterator.next();
+            if (piece.getSquareService().getSquare() == null) {
+                iterator.remove(); // Remove dead/invalid pieces
                 continue;
             }
 
-            List<SquareService> mvs = p.getLegalMoves(board);
-            for (SquareService mv : mvs) {
-                List<PieceStrategy> pieces = bMoves.get(mv);
-                pieces.add(p);
+            List<SquareService> moves = piece.getLegalMoves(boardService);
+            for (SquareService move : moves) {
+                blackMoves.get(move).add(piece);
             }
         }
     }
 
     /**
-     * Checks if the black king is threatened
+     * Determines if the black king is in check.
      *
-     * @return boolean representing whether the black king is in check.
+     * @return `true` if the black king is under threat, `false` otherwise.
      */
     public boolean blackInCheck() {
-        update();
-        SquareService sq = bk.getSquareService();
-        if (wMoves.get(sq).isEmpty()) {
-            movableSquares.addAll(squares);
-            return false;
-        } else return true;
+        return !whiteMoves.get(blackKing.getSquareService()).isEmpty();
     }
 
     /**
-     * Checks if the white king is threatened
+     * Determines if the white king is in check.
      *
-     * @return boolean representing whether the white king is in check.
+     * @return `true` if the white king is under threat, `false` otherwise.
      */
     public boolean whiteInCheck() {
-        update();
-        SquareService sq = wk.getSquareService();
-        if (bMoves.get(sq).isEmpty()) {
-            movableSquares.addAll(squares);
-            return false;
-        } else return true;
+        return !blackMoves.get(whiteKing.getSquareService()).isEmpty();
     }
 
     /**
-     * Checks whether black is in checkmate.
+     * Tests if a player's move is valid. This ensures the move complies with game rules
+     * and doesn’t leave their king in check.
      *
-     * @return boolean representing if black player is checkmated.
+     * @param movingPiece The piece that is being moved.
+     * @param targetSquare The square to which the piece is moved.
+     * @return `true` if the move is valid, `false` otherwise.
+     */
+    public boolean testMove(PieceStrategy movingPiece, SquareService targetSquare) {
+        // Save the current board state
+        SquareService startSquare = movingPiece.getSquareService();
+        PieceStrategy capturedPiece = targetSquare.getOccupyingPiece();
+
+        boolean isValidMove;
+
+        // Simulate the move
+        simulateMove(movingPiece, targetSquare);
+
+        // Determine if the move is valid
+        if (movingPiece.getPiece().getColor() == 0) { // Black piece
+            isValidMove = !blackInCheck();
+        } else { // White piece
+            isValidMove = !whiteInCheck();
+        }
+
+        // Rollback to the original state
+        rollbackMove(movingPiece, startSquare, targetSquare, capturedPiece);
+
+        return isValidMove;
+    }
+
+    // Helper method to simulate a temporary move
+    private void simulateMove(PieceStrategy movingPiece, SquareService targetSquare) {
+        SquareService startSquare = movingPiece.getSquareService();
+        targetSquare.put(movingPiece); // Place piece on target square
+        startSquare.removePiece(); // Remove piece from its original square
+    }
+
+    // Helper method to rollback a simulated move
+    private void rollbackMove(PieceStrategy movingPiece, SquareService startSquare,
+                              SquareService targetSquare, PieceStrategy capturedPiece) {
+        startSquare.put(movingPiece); // Restore the moving piece
+        targetSquare.removePiece();
+        if (capturedPiece != null) {
+            targetSquare.put(capturedPiece); // Restore the captured piece, if any
+        }
+    }
+
+    /**
+     * Determines if black is in checkmate.
+     *
+     * @return `true` if black is in checkmate, `false` otherwise.
      */
     public boolean blackCheckMated() {
-        boolean checkmate = true;
-        // Check if black is in check
-        if (!this.blackInCheck()) return false;
+        // If not in check, black is not in checkmate
+        if (!blackInCheck()) return false;
 
-        // If yes, check if king can evade
-        if (canEvade(wMoves, bk)) checkmate = false;
-
-        // If no, check if threat can be captured
-        List<PieceStrategy> threats = wMoves.get(bk.getSquareService());
-        if (canCapture(bMoves, threats, bk)) checkmate = false;
-
-        // If no, check if threat can be blocked
-        if (canBlock(threats, bMoves, bk)) checkmate = false;
-
-        // If no possible ways of removing check, checkmate occurred
-        return checkmate;
+        return !hasLegalMoves(blackPieces, blackKing);
     }
 
     /**
-     * Checks whether white is in checkmate.
+     * Determines if white is in checkmate.
      *
-     * @return boolean representing if white player is checkmated.
+     * @return `true` if white is in checkmate, `false` otherwise.
      */
     public boolean whiteCheckMated() {
-        boolean checkmate = true;
-        // Check if white is in check
-        if (!this.whiteInCheck()) return false;
+        // If not in check, white is not in checkmate
+        if (!whiteInCheck()) return false;
 
-        // If yes, check if king can evade
-        if (canEvade(bMoves, wk)) checkmate = false;
-
-        // If no, check if threat can be captured
-        List<PieceStrategy> threats = bMoves.get(wk.getSquareService());
-        if (canCapture(wMoves, threats, wk)) checkmate = false;
-
-        // If no, check if threat can be blocked
-        if (canBlock(threats, wMoves, wk)) checkmate = false;
-
-        // If no possible ways of removing check, checkmate occurred
-        return checkmate;
+        return !hasLegalMoves(whitePieces, whiteKing);
     }
 
-    /*
-     * Helper method to determine if the king can evade the check.
-     * Gives a false positive if the king can capture the checking piece.
-     */
-    private boolean canEvade(Map<SquareService, List<PieceStrategy>> tMoves, KingStrategy tKing) {
-        boolean evade = false;
-        List<SquareService> kingsMoves = tKing.getLegalMoves(board);
-
-        // If king is not threatened at some square, it can evade
-        for (SquareService sq : kingsMoves) {
-            if (!testMove(tKing, sq)) continue;
-            if (tMoves.get(sq).isEmpty()) {
-                movableSquares.add(sq);
-                evade = true;
-            }
-        }
-
-        return evade;
-    }
-
-    /*
-     * Helper method to determine if the threatening piece can be captured.
-     */
-    private boolean canCapture(Map<SquareService, List<PieceStrategy>> poss,
-                               List<PieceStrategy> threats, KingStrategy k) {
-
-        boolean capture = false;
-        if (threats.size() == 1) {
-            SquareService sq = threats.get(0).getSquareService();
-
-            if (k.getLegalMoves(board).contains(sq)) {
-                movableSquares.add(sq);
-                if (testMove(k, sq)) {
-                    capture = true;
-                }
-            }
-
-            List<PieceStrategy> caps = poss.get(sq);
-            ConcurrentLinkedDeque<PieceStrategy> capturers = new ConcurrentLinkedDeque<>(caps);
-
-            if (!capturers.isEmpty()) {
-                movableSquares.add(sq);
-                for (PieceStrategy p : capturers) {
-                    if (testMove(p, sq)) {
-                        capture = true;
-                    }
+    // Helper method to determine if a player has legal moves remaining
+    private boolean hasLegalMoves(List<PieceStrategy> pieces, KingStrategy king) {
+        for (PieceStrategy piece : pieces) {
+            List<SquareService> legalMoves = piece.getLegalMoves(boardService);
+            for (SquareService move : legalMoves) {
+                if (testMove(piece, move)) {
+                    return true; // Found at least one valid move
                 }
             }
         }
-
-        return capture;
-    }
-
-    /*
-     * Helper method to determine if check can be blocked by a piece.
-     */
-    private boolean canBlock(List<PieceStrategy> threats,
-                             Map<SquareService, List<PieceStrategy>> blockMoves, KingStrategy k) {
-        boolean blockable = false;
-
-        if (threats.size() == 1) {
-            SquareService squareService = threats.get(0).getSquareService();
-            Square ts = squareService.getSquare();
-            SquareService squareService1 = k.getSquareService();
-            Square ks = squareService1.getSquare();
-            SquareService[][] brdArray = board.getSquareBoard();
-
-            if (ks.getXNum() == ts.getXNum()) {
-                int max = Math.max(ks.getYNum(), ts.getYNum());
-                int min = Math.min(ks.getYNum(), ts.getYNum());
-
-                for (int i = min + 1; i < max; i++) {
-                    List<PieceStrategy> blks =
-                            blockMoves.get(brdArray[i][ks.getXNum()]);
-                    ConcurrentLinkedDeque<PieceStrategy> blockers =
-                            new ConcurrentLinkedDeque<>(blks);
-
-                    if (!blockers.isEmpty()) {
-                        movableSquares.add(brdArray[i][ks.getXNum()]);
-
-                        for (PieceStrategy p : blockers) {
-                            if (testMove(p, brdArray[i][ks.getXNum()])) {
-                                blockable = true;
-                            }
-                        }
-
-                    }
-                }
-            }
-
-            if (ks.getYNum() == ts.getYNum()) {
-                int max = Math.max(ks.getXNum(), ts.getXNum());
-                int min = Math.min(ks.getXNum(), ts.getXNum());
-
-                for (int i = min + 1; i < max; i++) {
-                    List<PieceStrategy> blks =
-                            blockMoves.get(brdArray[ks.getYNum()][i]);
-                    ConcurrentLinkedDeque<PieceStrategy> blockers =
-                            new ConcurrentLinkedDeque<>(blks);
-
-                    if (!blockers.isEmpty()) {
-
-                        movableSquares.add(brdArray[ks.getYNum()][i]);
-
-                        for (PieceStrategy p : blockers) {
-                            if (testMove(p, brdArray[ks.getYNum()][i])) {
-                                blockable = true;
-                            }
-                        }
-
-                    }
-                }
-            }
-
-            Class<? extends PieceStrategy> tC = threats.get(0).getClass();
-
-            if (tC.equals(Queen.class) || tC.equals(Bishop.class)) {
-                int kX = ks.getXNum();
-                int kY = ks.getYNum();
-                int tX = ts.getXNum();
-                int tY = ts.getYNum();
-
-                if (kX > tX && kY > tY) {
-                    for (int i = tX + 1; i < kX; i++) {
-                        tY++;
-                        List<PieceStrategy> blks =
-                                blockMoves.get(brdArray[tY][i]);
-                        ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>(blks);
-
-                        if (!blockers.isEmpty()) {
-                            movableSquares.add(brdArray[tY][i]);
-
-                            for (PieceStrategy p : blockers) {
-                                if (testMove(p, brdArray[tY][i])) {
-                                    blockable = true;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (kX > tX && tY > kY) {
-                    for (int i = tX + 1; i < kX; i++) {
-                        tY--;
-                        List<PieceStrategy> blks =
-                                blockMoves.get(brdArray[tY][i]);
-                        ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>(blks);
-
-                        if (!blockers.isEmpty()) {
-                            movableSquares.add(brdArray[tY][i]);
-
-                            for (PieceStrategy p : blockers) {
-                                if (testMove(p, brdArray[tY][i])) {
-                                    blockable = true;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (tX > kX && kY > tY) {
-                    for (int i = tX - 1; i > kX; i--) {
-                        tY++;
-                        List<PieceStrategy> blks =
-                                blockMoves.get(brdArray[tY][i]);
-                        ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>(blks);
-
-                        if (!blockers.isEmpty()) {
-                            movableSquares.add(brdArray[tY][i]);
-
-                            for (PieceStrategy p : blockers) {
-                                if (testMove(p, brdArray[tY][i])) {
-                                    blockable = true;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (tX > kX && tY > kY) {
-                    for (int i = tX - 1; i > kX; i--) {
-                        tY--;
-                        List<PieceStrategy> blks =
-                                blockMoves.get(brdArray[tY][i]);
-                        ConcurrentLinkedDeque<PieceStrategy> blockers =
-                                new ConcurrentLinkedDeque<>(blks);
-
-                        if (!blockers.isEmpty()) {
-                            movableSquares.add(brdArray[tY][i]);
-
-                            for (PieceStrategy p : blockers) {
-                                if (testMove(p, brdArray[tY][i])) {
-                                    blockable = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return blockable;
+        return false; // No legal moves left
     }
 
     /**
-     * Method to get a list of allowable squares that the player can move.
-     * Defaults to all squares, but limits available squares if player is in
-     * check.
+     * Returns a list of squares the current player can legally move to.
      *
-     * @param b boolean representing whether it's white player's turn (if yes,
-     *          true)
-     * @return List of squares that the player can move into.
+     * @param isWhiteTurn `true` if it’s white’s turn, `false` otherwise.
+     * @return List of allowable squares for the current player.
      */
-    public List<SquareService> getAllowableSquares(boolean b) {
-        movableSquares.clear();
-        if (whiteInCheck()) {
-            whiteCheckMated();
-        } else if (blackInCheck()) {
-            blackCheckMated();
+    public List<SquareService> getAllowableSquares(boolean isWhiteTurn) {
+        List<SquareService> allowableSquares = new ArrayList<>();
+
+        List<PieceStrategy> pieces = isWhiteTurn ? whitePieces : blackPieces;
+        for (PieceStrategy piece : pieces) {
+            List<SquareService> legalMoves = piece.getLegalMoves(boardService);
+            for (SquareService square : legalMoves) {
+                if (testMove(piece, square)) {
+                    allowableSquares.add(square);
+                }
+            }
         }
-        return movableSquares;
+
+        return allowableSquares;
     }
-
-    /**
-     * Tests a move a player is about to make to prevent making an illegal move
-     * that puts the player in check.
-     *
-     * @param p  chesspieces.common.Piece moved
-     * @param sq chesspieces.Square to which p is about to move
-     * @return false if move would cause a check
-     */
-    public boolean testMove(PieceStrategy p, SquareService sq) {
-        PieceStrategy pieceStrategy = sq.getOccupyingPiece();
-
-        boolean movetest = true;
-        SquareService squareService = p.getSquareService();
-
-        p.move(sq, board);
-        update();
-
-        if (p.getPiece().getColor() == 0 && blackInCheck()) movetest = false;
-        else if (p.getPiece().getColor() == 1 && whiteInCheck()) movetest = false;
-
-        p.move(squareService, board);
-        if (pieceStrategy != null) sq.put(pieceStrategy);
-
-        update();
-
-        movableSquares.addAll(squares);
-        return movetest;
-    }
-
 }
