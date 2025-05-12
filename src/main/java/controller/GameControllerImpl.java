@@ -14,10 +14,12 @@ import static services.enums.PieceColor.WHITE;
 public class GameControllerImpl implements GameController {
     private final BoardService boardService;
     private final CheckmateDetector checkmateDetector;
+    private final GameWindowInterface gameWindowInterface;
 
-    public GameControllerImpl(BoardService boardService, CheckmateDetector checkmateDetector) {
+    public GameControllerImpl(BoardService boardService, CheckmateDetector checkmateDetector, GameWindowInterface gameWindowInterface) {
         this.boardService = boardService;
         this.checkmateDetector = checkmateDetector;
+        this.gameWindowInterface = gameWindowInterface;
     }
 
 
@@ -90,13 +92,13 @@ public class GameControllerImpl implements GameController {
             PieceColor opponentColor = originalPieceColor.equals(WHITE) ? BLACK : WHITE;
             // Check if the opponent is in checkmate
             if (checkmateDetector.isInCheckmate(boardService, opponentColor)) {
-                System.out.println("Checkmate! You win!");
-//                    setupBoardForCheckmate(boardService, opponentColor);
+
+                gameWindowInterface.checkmateOccurred(opponentColor);
             }
             // Check if the opponent is in stalemate
             else if (checkmateDetector.isInStalemate(boardService, opponentColor)) {
-                System.out.println("Stalemate! The game is a draw.");
-                // TODO: Handle the end of the game logic
+
+                gameWindowInterface.stalemateOccurred();
             }
             // Change the turn to the other player
             boardService.setWhiteTurn(!boardService.isWhiteTurn());

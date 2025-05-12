@@ -33,11 +33,9 @@ public interface Move {
         PieceColor targetPieceColor = targetPiece.getPieceColor();
 
         if (targetPieceColor.equals(BLACK)) {
-            if (targetPiece instanceof King) boardService.setBlackKing(null);
             boardService.getBlackPieces().remove(targetPiece);
         }
         if (targetPieceColor.equals(WHITE)) {
-            if (targetPiece instanceof King) boardService.setWhiteKing(null);
             boardService.getWhitePieces().remove(targetPiece);
         }
 

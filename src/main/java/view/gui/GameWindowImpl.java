@@ -2,14 +2,15 @@ package view.gui;
 
 import controller.GameController;
 import controller.GameControllerImpl;
+import controller.GameWindowInterface;
 import model.board.Board;
-import services.utils.Clock;
 import services.board.BoardInterface;
 import services.board.BoardService;
 import services.board.BoardServiceImpl;
 import services.checkmatedetection.CheckmateDetector;
 import services.checkmatedetection.CheckmateDetectorImpl;
 import services.enums.PieceColor;
+import services.utils.Clock;
 import view.BoardView;
 import view.mouseListener.CustomBoardMouseListenerImpl;
 
@@ -23,7 +24,7 @@ import static services.enums.ImagePath.RESOURCES_WPAWN_PNG;
 import static services.enums.PieceColor.BLACK;
 
 
-public class GameWindowImpl implements GameWindow {
+public class GameWindowImpl implements GameWindow, GameWindowInterface {
     private final JFrame gameWindow;
     private final BoardService boardService;
     public Clock blackClock;
@@ -63,7 +64,7 @@ public class GameWindowImpl implements GameWindow {
 
         CheckmateDetector checkmateDetector = new CheckmateDetectorImpl();
 
-        GameController gameController = new GameControllerImpl(boardService, checkmateDetector);
+        GameController gameController = new GameControllerImpl(boardService, checkmateDetector, this);
 
         new CustomBoardMouseListenerImpl(boardView, this, gameController);
 
@@ -138,7 +139,7 @@ public class GameWindowImpl implements GameWindow {
     }
 
     private void handleClockTimer(boolean whiteTurn, JLabel time, String currentPlayerName, String opponentPlayerName,
-                                  int hours, int minutes, int seconds){
+                                  int hours, int minutes, int seconds) {
         Clock playerClock = whiteTurn ? whiteClock : blackClock;
 
         playerClock.decrementTime();
@@ -226,32 +227,45 @@ public class GameWindowImpl implements GameWindow {
     }
 
     public void checkmateOccurred(PieceColor pieceColor) {
+        String outputMessage = "";
+        String title = "";
         if (pieceColor.equals(BLACK)) {
-            if (timer != null) timer.stop();
-            int n = JOptionPane.showConfirmDialog(
-                    gameWindow,
-                    "White wins by checkmate! Set up a new game? \n" +
-                            "Choosing \"No\" lets you look at the final situation.",
-                    "White wins!",
-                    JOptionPane.YES_NO_OPTION);
 
-            if (n == JOptionPane.YES_OPTION) {
-                SwingUtilities.invokeLater(new StartMenu());
-                gameWindow.dispose();
-            }
+            outputMessage = "White wins by checkmate! Set up a new game? \n" +
+                    "Choosing \"No\" lets you look at the final situation.";
+
+            title = "White wins by checkmate!";
         } else {
-            if (timer != null) timer.stop();
-            int n = JOptionPane.showConfirmDialog(
-                    gameWindow,
-                    "Black wins by checkmate! Set up a new game? \n" +
-                            "Choosing \"No\" lets you look at the final situation.",
-                    "Black wins!",
-                    JOptionPane.YES_NO_OPTION);
 
-            if (n == JOptionPane.YES_OPTION) {
-                SwingUtilities.invokeLater(new StartMenu());
-                gameWindow.dispose();
-            }
+            outputMessage = "Black wins by checkmate! Set up a new game? \n" +
+                    "Choosing \"No\" lets you look at the final situation.";
+
+            title = "Black wins by checkmate!";
+        }
+
+        endLogicHelper(outputMessage, title);
+    }
+
+    public void stalemateOccurred(){
+        String outputMessage = "Stalemate! Set up a new game? \n" +
+                "Choosing \"No\" lets you look at the final situation.";
+
+        String title = "Draw!";
+
+        endLogicHelper(outputMessage, title);
+    }
+
+    private void endLogicHelper(String outputMessage, String title){
+        if (timer != null) timer.stop();
+        int n = JOptionPane.showConfirmDialog(
+                gameWindow,
+                outputMessage,
+                title,
+                JOptionPane.YES_NO_OPTION);
+
+        if (n == JOptionPane.YES_OPTION) {
+            SwingUtilities.invokeLater(new StartMenu());
+            gameWindow.dispose();
         }
     }
 

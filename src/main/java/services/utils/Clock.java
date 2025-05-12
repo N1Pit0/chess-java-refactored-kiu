@@ -17,18 +17,18 @@ public class Clock {
 
     public void decrementTime() {
 
-        if(seconds > 0) {
+        if (seconds > 0) {
             seconds--;
             return;
         }
 
-        if(minutes > 0) {
+        if (minutes > 0) {
             minutes--;
             seconds = 59;
             return;
         }
 
-        if(hours > 0) {
+        if (hours > 0) {
             hours--;
             minutes = 59;
             seconds = 59;
